@@ -45,7 +45,6 @@ async function db_count_users() {
     const count = rows[0]['COUNT(*)'];
     return count;
 }
->>>>>>> 5f28167a840ac769ac545c68f23ae34ab4baf599
 
 
    
