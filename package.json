@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/YannAlAkl/School-Magement-System#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "express-session": "^1.18.2",
+    "mysql2": "^3.16.0"
   }
 }
