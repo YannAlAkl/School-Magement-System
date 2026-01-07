@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const requireRole = require('../middleware/requireRole');
-router.get('/teacher', requireRole('teacher'), (req, res) => { 
-    res.send('Tableau de bord enseignant (placeholder)');
-});
+const teacher_controller = require('../controllers/teacher.controller');
+
+router.get('/teacher', requireRole('teacher'), teacher_controller.showDashboard);
+
 module.exports = router;

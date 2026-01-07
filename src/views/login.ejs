@@ -1,29 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title> <!-- Définit le titre de l'onglet du navigateur à "Login". -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>Login</h1> <!-- Titre principal pour la page de connexion. -->
+  <div class="center-screen">
+    <div class="card card-sm">
+      <h1 class="auth-title">Login</h1>
+      <p class="auth-subtitle">Connect to your account</p>
 
-    <% if (error) { %>
-        <!-- Affiche un message d'erreur en rouge si la variable 'error' est passée au template. -->
-        <p style="color:red;"><%= error %></p>
-    <% } %>
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
 
-    <!-- Formulaire de connexion : Soumet les données à la route /login en utilisant la méthode POST. -->
-    <form action="/login" method="POST">
-        <label for="username">Nom d'utilisateur</label>
-        <input type="text" id="username" name="username" required> <!-- Champ de saisie pour le nom d'utilisateur. -->
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label for="username">Nom d'utilisateur</label>
+          <input type="text" id="username" name="username" required />
+        </div>
 
-        <label for="password">Mot de passe</label>
-        <input type="password" id="password" name="password" required> <!-- Champ de saisie pour le mot de passe. -->
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" name="password" required />
+        </div>
 
-        <button type="submit">Se connecter</button> <!-- Bouton de soumission pour le formulaire de connexion. -->
-    </form> 
-    <!-- Lien pour l'inscription si aucun administrateur n'est encore enregistré. -->
-    <p>Pas encore de compte ? <a href="/register">S'inscrire</a></p>
+        <button class="btn btn-block" type="submit">Se connecter</button>
+      </form>
+
+      <div class="auth-footer">
+        Pas encore de compte ? <a href="/register">S'inscrire</a>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
