@@ -104,10 +104,10 @@ async function showEditUserRoleForm(req, res) {
 
         if (!userToEdit) {
             req.session.error = 'Utilisateur non trouvé.';
-            return res.redirect('/admin');
+            return res.render('admin/edit_role');
         }
 
-        return res.render('admin/editUserRole', {
+        return res.render('admin/edit_role', {
             user: req.session.user,
             userToEdit: userToEdit,
             error: null,
@@ -126,7 +126,7 @@ async function editUserRole(req, res) {
 
     if (!newRole) {
         req.session.error = 'Le nouveau rôle est requis.';
-        return res.redirect('/admin');
+        return res.render('/admin/edit_role');
     }
 
     try {

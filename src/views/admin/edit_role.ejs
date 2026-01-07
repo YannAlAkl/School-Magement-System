@@ -1,0 +1,23 @@
+<!-- style -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Edit role</h1>
+    <form action="/admin/users/edit-role/<%= userToEdit.id %>" method="POST">
+        <label for="newRole">New role:</label>
+        <select name="newRole" id="newRole">
+            <option value="admin">Admin</option>
+            <option value="teacher">Teacher</option>
+            <option value="student">Student</option>
+        </select>
+        <button type="submit">Edit</button>
+    </form>
+
+</body>
+</html>
