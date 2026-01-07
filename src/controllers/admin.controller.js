@@ -30,7 +30,7 @@ async function showDashboard(req, res) {
 }
 
 async function showAddUserForm(req, res) {
-    return res.render('admin/addUser', {
+    return res.render('admin/users_add', {
         user: req.session.user,
         error: null,
         success: null,
@@ -41,7 +41,7 @@ async function addUser(req, res) {
     const { username, email, password, role } = req.body;
 
     if (!username || !email || !password || !role) {
-        return res.status(400).render('admin/addUser', {
+        return res.status(400).render('admin/users_add', {
             user: req.session.user,
             error: 'Tous les champs sont requis.',
             success: null,
@@ -53,7 +53,7 @@ async function addUser(req, res) {
         const emailExists = await User.db_find_user_by_email(email);
 
         if (userExists || emailExists) {
-            return res.status(400).render('admin/addUser', {
+            return res.status(400).render('admin/users_add', {
                 user: req.session.user,
                 error: "Nom d'utilisateur ou e-mail déjà utilisé.",
                 success: null,
@@ -62,14 +62,15 @@ async function addUser(req, res) {
 
         await User.db_insert_user(username, email, password, role);
 
-        return res.render('admin/addUser', {
+        return res.render('admin/dashboard', {
             user: req.session.user,
             error: null,
             success: 'Utilisateur ajouté avec succès.',
         });
+        
     } catch (err) {
         console.error("Erreur lors de l'ajout de l'utilisateur:", err);
-        return res.status(500).render('admin/addUser', {
+        return res.status(500).render('admin/users_add', {
             user: req.session.user,
             error: "Erreur serveur lors de l'ajout de l'utilisateur.",
             success: null,
