@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login</title> <!-- Définit le titre de l'onglet du navigateur à "Login". -->
 </head>
 <body>
-    <h1>Login</h1>
+    <h1>Login</h1> <!-- Titre principal pour la page de connexion. -->
 
     <% if (error) { %>
+        <!-- Affiche un message d'erreur en rouge si la variable 'error' est passée au template. -->
         <p style="color:red;"><%= error %></p>
     <% } %>
 
-    <!-- ✅ post to /login (not /admin/login) -->
+    <!-- Formulaire de connexion : Soumet les données à la route /login en utilisant la méthode POST. -->
     <form action="/login" method="POST">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
+        <label for="username">Nom d'utilisateur</label>
+        <input type="text" id="username" name="username" required> <!-- Champ de saisie pour le nom d'utilisateur. -->
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required> <!-- Champ de saisie pour le mot de passe. -->
 
-        <button type="submit">Login</button>
+        <button type="submit">Se connecter</button> <!-- Bouton de soumission pour le formulaire de connexion. -->
     </form> 
+    <!-- Lien pour l'inscription si aucun administrateur n'est encore enregistré. -->
+    <p>Pas encore de compte ? <a href="/register">S'inscrire</a></p>
 </body>
 </html>
