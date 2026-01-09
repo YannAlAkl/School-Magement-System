@@ -1,28 +1,13 @@
-const db = require('../db');
-
 async function db_insert_course(title, description, coeficient, course_hours) {
-    const sql = `INSERT INTO courses (title, description, coeficient, course_hours) VALUES (?, ?, ?, ?)`; 
-    const [result] = await db.execute(sql, [title, description, coeficient, course_hours]); 
+    const sql = `INSERT INTO courses (title, description, coeficient, course_hours) VALUES (?, ?, ?, ?)`;
+    const [result] = await db.execute(sql, [title, description, coeficient, course_hours]);
     return result.insertId; 
 }
 
-async function db_view_courses() {
-    const sql = `SELECT * FROM courses`;
-    const [results] = await db.execute(sql);
-    return results;
-}
-
-async function db_find_course_by_title(title) {
-    const sql = `SELECT * FROM courses WHERE title = ?`;
-    const [rows] = await db.execute(sql, [title]);
-    return rows[0] || null;
-}
-
-// ✅ Correction de la syntaxe SQL UPDATE
 async function db_edit_course(id, title, description, coeficient, course_hours) {
     const sql = `UPDATE courses SET title = ?, description = ?, coeficient = ?, course_hours = ? WHERE id = ?`;
     const [result] = await db.execute(sql, [title, description, coeficient, course_hours, id]);
-    return result.affectedRows > 0; // Retourne true si mis à jour
+    return result.affectedRows > 0; 
 }
 
 async function db_delete_course(id) {
@@ -31,11 +16,40 @@ async function db_delete_course(id) {
     return result.affectedRows > 0;
 }
 
-// ✅ Ajout de db_find_course_by_title dans les exports (sinon ton contrôleur plantera)
-module.exports = {
-    db_insert_course,
-    db_view_courses,
-    db_find_course_by_title,
-    db_edit_course,
-    db_delete_course    
-};
+async function db_find_course_by_title(title) {
+    const sql = `SELECT * FROM courses WHERE title = ?`;
+    const [rows] = await db.execute(sql, [title]);
+    return rows[0] || null;
+}
+async function db_find_course_by_id(id) {
+    const sql = `SELECT * FROM courses WHERE id = ?`;
+    const [rows] = await db.execute(sql, [id]);
+    return rows[0] || null;
+}
+   
+async function assignCourseToUser(req, res) {
+    const sql = `INSERT INTO user_courses (user_id, course_id) VALUES (?, ?)`;
+    const [result] = await db.execute(sql, [req.body.user_id, req.body.course_id]);
+    return result.affectedRows > 0;
+}
+
+async function showAttributesCourseToUser(req, res) {
+    try {
+        const sql = `SELECT * FROM user_courses WHERE user_id = ?`;
+        const [rows] = await db.execute(sql, [req.params.id]);
+        return res.render('admin/attributes_course_to_user', {
+            user: req.session.user,
+            rows: rows,
+            error: null,
+            success: null,
+        });
+    } catch (err) {
+        console.error("Erreur lors de l'affichage des attributs du cours à l'utilisateur:", err);
+        return res.status(500).render('admin/attributes_course_to_user', {
+            user: req.session.user,
+            rows: [],
+            error: 'Erreur serveur lors du chargement des attributs du cours à l\'utilisateur.',
+            success: null,
+        });
+    }
+}

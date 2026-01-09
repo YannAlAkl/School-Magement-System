@@ -30,7 +30,7 @@ async function showDashboard(req, res) {
     }
 }
 
-async function showAddUserForm(req, res) {
+async function showAddUser(req, res) {
     return res.render('admin/users_add', {
         user: req.session.user,
         error: null,
@@ -97,7 +97,7 @@ async function deleteUser(req, res) {
     return res.redirect('/admin');
 }
 
-async function showEditUserRoleForm(req, res) {
+async function showEditUserRole(req, res) {
     const userId = req.params.id;
 
     try {
@@ -145,10 +145,89 @@ async function editUserRole(req, res) {
     return res.redirect('/admin');
 }
 
+async function addCourse(req, res) {
+    const { title, description, coeficient, course_hours } = req.body;
+    try {
+        const courseExists = await Course.db_find_course_by_title(title);
+        if (courseExists) {
+            return res.status(400).render('admin/courses_add', {
+                user: req.session.user,
+                error: "Le cours existe déjà.",
+                success: null,
+            });
+        }
+        await Course.db_insert_course(title, description, coeficient, course_hours);
+        return res.render('admin/courses', {
+            user: req.session.user,
+            error: null,
+            success: 'Cours ajouté avec succès.',
+        });
+        
+    }
+    catch (err) {
+        console.error("Erreur lors de l'ajout du cours:", err);
+        return res.status(500).render('admin/courses_add', {
+            user: req.session.user,
+            error: "Erreur serveur lors de l'ajout du cours.",
+            success: null,
+        });
+    }
+}
+async function editCourse(req, res) {
+    const courseId = req.params.id;
+    const { title, description, coeficient, course_hours } = req.body;
+    try {
+        const success = await Course.db_edit_course(courseId, title, description, coeficient, course_hours);
+        if (success) {
+            req.session.success = "Cours mis à jour avec succès.";
+        } else {
+            req.session.error = "Échec de la mise à jour du cours.";
+        }
+    } catch (err) {
+        console.error("Erreur lors de la modification du cours:", err);
+        req.session.error = 'Erreur serveur lors de la mise à jour du cours.';
+    }
+    return res.redirect('/admin');
+}
+async function showEditCourse(req, res) {
+    const courseId = req.params.id;
+    try {
+        const courseToEdit = await Course.db_find_course_by_id(courseId);
+        if (!courseToEdit) {
+            req.session.error = 'Cours non trouvé.';
+            return res.render('admin/edit_course');
+        }
+        return res.render('admin/edit_course', {
+            user: req.session.user,
+            courseToEdit: courseToEdit,
+            error: null,
+            success: null,
+        });
+    } catch (err) {
+        console.error("Erreur lors de l'affichage du formulaire de modification du cours:", err);
+        req.session.error = 'Erreur serveur.';
+        return res.redirect('/admin');
+    }
+}   
+async function deleteCourse(req, res) {
+    const courseId = req.params.id;
+    try {
+        const success = await Course.db_delete_course(courseId);
+        if (success) {
+            req.session.success = 'Cours supprimé avec succès.';
+        } else {
+            req.session.error = "Échec de la suppression du cours.";
+        }
+    } catch (err) {
+        console.error("Erreur lors de la suppression du cours:", err);
+        req.session.error = "Erreur serveur lors de la suppression du cours.";
+    }
+    return res.redirect('/admin');
+}
+
 async function showCourses(req, res) {
     try {
-        const courses = await Course.db_view_courses();
-
+        const courses = await Course.db_find_all_courses();
         return res.render('admin/courses', {
             user: req.session.user,
             courses: courses,
@@ -166,122 +245,55 @@ async function showCourses(req, res) {
     }
 }
 
-async function addCourse(req, res) {
-    const { title, description, coeficient, course_hours } = req.body;
-
-    if (!title || !description || !coeficient || !course_hours) {
-        return res.status(400).render('admin/courses_add', {
-            user: req.session.user,
-            error: 'Tous les champs sont requis.',
-            success: null,
-        });
-    }
+async function assignCourseToUser(req, res) {
+    const courseId = req.body.course_id;
+    const userId = req.body.user_id;
     try {
-        const courseExists = await Course.db_find_course_by_title(title);
-
-        if (courseExists) {
-            return res.status(400).render('admin/courses_add', {
-                user: req.session.user,
-                error: "Le cours existe déjà.",
-                success: null,
-            });
-        }
-
-        await Course.db_insert_course(title, description, coeficient, course_hours);
-
-        return res.render('admin/courses', {
-            user: req.session.user,
-            error: null,
-            success: 'Cours ajouté avec succès.',
-        });
-        
-    }
-    catch (err) {
-        console.error("Erreur lors de l'ajout du cours:", err);
-        return res.status(500).render('admin/courses_add', {
-            user: req.session.user,
-            error: "Erreur serveur lors de l'ajout du cours.",
-            success: null,
-        });
-    }
-}
-
-async function deleteCourse(req, res) {
-    const courseId = req.params.id;
-
-    try {
-        const success = await Course.db_delete_course(courseId);
+        const success = await Course.attributeCourseToUser(courseId, userId);
         if (success) {
-            req.session.success = 'Cours supprimé avec succès.';
+            req.session.success = 'Course assigned with success.';
         } else {
-            req.session.error = "Échec de la suppression du cours.";
+            req.session.error = "Échec de l'assignation de la course.";
         }
     } catch (err) {
-        console.error("Erreur lors de la suppression du cours:", err);
-        req.session.error = "Erreur serveur lors de la suppression du cours.";
+        console.error("Erreur lors de l'assignation de la course:", err);
+        req.session.error = 'Erreur serveur lors de l\'assignation de la course.';
     }
-
-    return res.redirect('/admin');
-}
-
-async function showEditCourseForm(req, res) {
+    return res.redirect('/admin/courses');
+}   
+async function showAssignCourseToUser(req, res) {
     const courseId = req.params.id;
-
     try {
-        const courseToEdit = await Course.db_find_course_by_id(courseId);
-
+        const courseToEdit = await Course.showAttributesCourseToUser(courseId);
         if (!courseToEdit) {
-            req.session.error = 'Cours non trouvé.';
-            return res.render('admin/edit_course');
+            req.session.error = 'Course not found.';
+            return res.render('admin/assign_course_to_user');
         }
-
-        return res.render('admin/edit_course', {
+        return res.render('admin/assign_course_to_user', {
             user: req.session.user,
             courseToEdit: courseToEdit,
             error: null,
             success: null,
         });
     } catch (err) {
-        console.error("Erreur lors de l'affichage du formulaire de modification du cours:", err);
+        console.error("Erreur lors de l'affichage du formulaire de modification de rôle:", err);
         req.session.error = 'Erreur serveur.';
         return res.redirect('/admin');
     }
-}
-
-async function editCourse(req, res) {
-    const courseId = req.params.id;
-    const { title, description, coeficient, course_hours } = req.body;
-
-    if (!title || !description || !coeficient || !course_hours) {
-        req.session.error = 'Tous les champs sont requis.';
-        return res.render('/admin/edit_course');
-    }
-
-    try {
-        const success = await Course.db_edit_course(courseId, title, description, coeficient, course_hours);
-        if (success) {
-            req.session.success = "Cours mis à jour avec succès.";
-        } else {
-            req.session.error = "Échec de la mise à jour du cours.";
-        }
-    } catch (err) {
-        console.error("Erreur lors de la modification du cours:", err);
-        req.session.error = 'Erreur serveur lors de la mise à jour du cours.';
-    }
-
-    return res.redirect('/admin');
-}
+}   
 module.exports = { 
     showDashboard, 
-    showAddUserForm, 
+    showAddUser, 
     addUser, 
     deleteUser, 
-    showEditUserRoleForm, 
-     editUserRole,  
-     showCourses, 
-     addCourse, 
-     deleteCourse, 
-     showEditCourseForm, 
-     editCourse,
+    showEditUserRole, 
+    editUserRole,  
+    showCourses, 
+    addCourse, 
+    deleteCourse, 
+    showEditCourse, 
+    editCourse, 
+    assignCourseToUser,
+    showAssignCourseToUser,
 
 };
