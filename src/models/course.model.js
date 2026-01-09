@@ -1,3 +1,4 @@
+const db = require('../db');
 async function db_insert_course(title, description, coeficient, course_hours) {
     const sql = `INSERT INTO courses (title, description, coeficient, course_hours) VALUES (?, ?, ?, ?)`;
     const [result] = await db.execute(sql, [title, description, coeficient, course_hours]);
@@ -37,7 +38,7 @@ async function assignCourseToUser(req, res) {
     return result.affectedRows > 0;
 }
 
-async function showAttributesCourseToUser(req, res) {
+async function showAssignCourseToUser(req, res) {
     try {
         const sql = `SELECT * FROM user_courses WHERE user_id = ?`;
         const [rows] = await db.execute(sql, [req.params.id]);
@@ -57,3 +58,14 @@ async function showAttributesCourseToUser(req, res) {
         });
     }
 }
+
+module.exports = {
+    db_insert_course,
+    db_edit_course,
+    db_delete_course,
+    db_find_all_courses,
+    db_find_course_by_title,
+    db_find_course_by_id,
+    assignCourseToUser,
+    showAssignCourseToUser,
+};

@@ -148,26 +148,40 @@ async function editUserRole(req, res) {
 async function addCourse(req, res) {
     const { title, description, coeficient, course_hours } = req.body;
     try {
+        // 1. Check if course exists
         const courseExists = await Course.db_find_course_by_title(title);
+        
+        // IMPORTANT: We need the list of courses for EVERY render of this page
+        const courses = await Course.db_find_all_courses();
+
         if (courseExists) {
             return res.status(400).render('admin/courses', {
                 user: req.session.user,
+                courses: courses, // Added this
                 error: "Le cours existe déjà.",
                 success: null,
             });
         }
+
+        // 2. Insert the course
         await Course.db_insert_course(title, description, coeficient, course_hours);
+        
+        // 3. Refresh the list after insertion
+        const updatedCourses = await Course.db_find_all_courses();
+
         return res.render('admin/courses', {
             user: req.session.user,
+            courses: updatedCourses, // Added this
             error: null,
             success: 'Cours ajouté avec succès.',
         });
         
-    }
-    catch (err) {
+    } catch (err) {
         console.error("Erreur lors de l'ajout du cours:", err);
+        // Even on error, the view needs the courses array (even if empty)
         return res.status(500).render('admin/courses', {
             user: req.session.user,
+            courses: [], // Added this to prevent EJS crash
             error: "Erreur serveur lors de l'ajout du cours.",
             success: null,
         });
@@ -264,7 +278,7 @@ async function assignCourseToUser(req, res) {
 async function showAssignCourseToUser(req, res) {
     const courseId = req.params.id;
     try {
-        const courseToEdit = await Course.showAttributesCourseToUser(courseId);
+        const courseToEdit = await Course.showAssignCourseToUser(courseId);
         if (!courseToEdit) {
             req.session.error = 'Course not found.';
             return res.render('admin/courses');
@@ -295,5 +309,6 @@ module.exports = {
     editCourse, 
     assignCourseToUser,
     showAssignCourseToUser,
+    
 
 };

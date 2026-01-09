@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <%- include('../shared/header') %>
+   
 
     <div class="container">
         <h1>Manage Courses</h1>
@@ -21,7 +21,7 @@
 
         <!-- Add Course Form -->
         <h2>Add New Course</h2>
-        <form action="/admin/courses/add" method="POST">
+        <form action="/admin/courses/add" method="POST" >
             <div class="form-group">
                 <label for="title">Title:</label>
                 <input type="text" id="title" name="title" required>
@@ -94,6 +94,6 @@
         </form>
     </div>
 
-    <%- include('../shared/footer') %>
+
 </body>
 </html>

@@ -74,5 +74,5 @@ module.exports = {
     db_find_all_users,
     db_update_user_role,
     db_delete_user,
-    verifyPassword
+    verifyPassword,
 };
