@@ -150,7 +150,7 @@ async function addCourse(req, res) {
     try {
         const courseExists = await Course.db_find_course_by_title(title);
         if (courseExists) {
-            return res.status(400).render('admin/courses_add', {
+            return res.status(400).render('admin/courses', {
                 user: req.session.user,
                 error: "Le cours existe déjà.",
                 success: null,
@@ -166,7 +166,7 @@ async function addCourse(req, res) {
     }
     catch (err) {
         console.error("Erreur lors de l'ajout du cours:", err);
-        return res.status(500).render('admin/courses_add', {
+        return res.status(500).render('admin/courses', {
             user: req.session.user,
             error: "Erreur serveur lors de l'ajout du cours.",
             success: null,
@@ -195,9 +195,9 @@ async function showEditCourse(req, res) {
         const courseToEdit = await Course.db_find_course_by_id(courseId);
         if (!courseToEdit) {
             req.session.error = 'Cours non trouvé.';
-            return res.render('admin/edit_course');
+            return res.render('admin/courses');
         }
-        return res.render('admin/edit_course', {
+        return res.render('admin/courses', {
             user: req.session.user,
             courseToEdit: courseToEdit,
             error: null,
@@ -267,9 +267,9 @@ async function showAssignCourseToUser(req, res) {
         const courseToEdit = await Course.showAttributesCourseToUser(courseId);
         if (!courseToEdit) {
             req.session.error = 'Course not found.';
-            return res.render('admin/assign_course_to_user');
+            return res.render('admin/courses');
         }
-        return res.render('admin/assign_course_to_user', {
+        return res.render('admin/courses', {
             user: req.session.user,
             courseToEdit: courseToEdit,
             error: null,

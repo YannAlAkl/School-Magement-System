@@ -15,7 +15,11 @@ async function db_delete_course(id) {
     const [result] = await db.execute(sql, [id]);
     return result.affectedRows > 0;
 }
-
+async function db_find_all_courses() {
+    const sql = `SELECT * FROM courses`;
+    const [rows] = await db.execute(sql);
+    return rows;
+}
 async function db_find_course_by_title(title) {
     const sql = `SELECT * FROM courses WHERE title = ?`;
     const [rows] = await db.execute(sql, [title]);
