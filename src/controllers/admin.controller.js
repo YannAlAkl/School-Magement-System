@@ -348,6 +348,117 @@ async function showEnrolementPayement(req, res) {
     }
 }
 
+async function showCalendrier(req, res) {
+    try {
+        const events = await Event.db_find_all_events();
+        return res.render('admin/calendrier', {
+            user: req.session.user,
+            events: events,
+            error: null,
+            success: null,
+        });
+    } catch (err) {
+        console.error("Erreur lors de l'affichage du calendrier:", err);
+        return res.status(500).render('admin/calendrier', {
+            user: req.session.user,
+            events: [],
+            error: 'Erreur serveur lors du chargement des évènements.',
+            success: null,
+        });
+    }
+}
+async function addEvent(req, res) {
+    const { title, description, date, time, status } = req.body;    
+    try {
+        const success = await Event.db_insert_event(title, description, date, time, status);
+        if (success) {
+            req.session.success = 'Évènement ajouté avec succès.';
+        } else {
+            req.session.error = "Échec de l'ajout de l'évènement.";
+        }
+    } catch (err) {
+        console.error("Erreur lors de l'ajout de l'évènement:", err);
+        req.session.error = 'Erreur serveur lors de l\'ajout de l\'évènement.';
+    }
+    return res.redirect('/admin/calendrier');
+}
+async function editEvent(req, res) {
+    const eventId = req.params.id;
+    const { title, description, date, time, status } = req.body;
+    try {
+        const success = await Event.db_edit_event(eventId, title, description, date, time, status);
+        if (success) {
+            req.session.success = "Évènement mis à jour avec succès.";
+        } else {
+            req.session.error = "Échec de la mise à jour de l'évènement.";
+        }
+    } catch (err) {
+        console.error("Erreur lors de la mise à jour de l'évènement:", err);
+        req.session.error = 'Erreur serveur lors de la mise à jour de l\'évènement.';
+    }
+    return res.redirect('/admin/calendrier');
+}
+async function deleteEvent(req, res) {
+    const eventId = req.params.id;
+    try {
+        const success = await Event.db_delete_event(eventId);
+        if (success) {
+            req.session.success = 'Évènement supprimé avec succès.';
+        } else {
+            req.session.error = "Échec de la suppression de l'évènement.";
+        }
+    } catch (err) {
+        console.error("Erreur lors de la suppression de l'évènement:", err);
+        req.session.error = "Erreur serveur lors de la suppression de l'évènement.";
+    }
+    return res.redirect('/admin/calendrier');
+}       
+
+asyn function findEvenntByTitle(req, res) {
+    const eventTitle = req.params.title;
+    try {
+        const event = await Event.db_find_event_by_title(eventTitle);
+        if (!event) {
+            req.session.error = 'Évènement non trouvé.';
+            return res.render('admin/calendrier');
+        }
+        return res.render('admin/calendrier', {
+            user: req.session.user,
+            event: event,
+            error: null,
+            success: null,
+        });
+    } catch (err) {
+        console.error("Erreur lors de l'affichage de l'évènement:", err);
+        req.session.error = 'Erreur serveur.';
+        return res.redirect('/admin/calendrier');
+    }
+}
+
+async function showEvent(req, res) {
+    const eventId = req.params.id;
+    try {
+        const event = await Event.db_find_event_by_id(eventId);
+        if (!event) {
+            req.session.error = 'Évènement non trouvé.';
+            return res.render('admin/calendrier');
+        }
+        return res.render('admin/calendrier', {
+            user: req.session.user,
+            event: event,
+            error: null,
+            success: null,
+        });
+    } catch (err) {
+        console.error("Erreur lors de l'affichage de l'évènement:", err);
+        req.session.error = 'Erreur serveur.';
+        return res.redirect('/admin/calendrier');
+    }
+}
+
+
+
+
 module.exports = {
     showDashboard,
     showAddUser,
@@ -362,6 +473,12 @@ module.exports = {
     editCourse,
     assignCourseToUser,
     showAssignCourseToUser,
-    showEnrolementPayement
+    showEnrolementPayement,
+    showCalendrier,
+    addEvent,
+    editEvent,
+    deleteEvent,
+    findEvenntByTitle,
+    showEvent,      
 
 };

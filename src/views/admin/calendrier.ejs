@@ -1,0 +1,47 @@
+<!-- calendrier scolaire  similaire a ce des platforme scolaire --> 
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>calendrier</title>
+ </head>
+ <body>
+     <h1>Calendrier</h1>
+     <p>Ajouter un évènement</p>
+     <form action="/admin/calendrier/add" method="POST">
+         <label for="title">Titre:</label>
+         <input type="text" id="title" name="title" required>
+         <label for="description">Description:</label>
+         <textarea id="description" name="description" required></textarea>
+         <label for="date">Date:</label>
+         <input type="date" id="date" name="date" required>
+         <label for="time">Heure:</label>
+         <input type="time" id="time" name="time" required>
+         <button type="submit">Ajouter</button>
+     </form>
+     <h2>Liste des évènements</h2>
+     <% if (events && events.length > 0) { %>
+         <% events.forEach(event => { %>
+             <div class="event-item">
+                 <h3><%= event.title %></h3>
+                 <p><%= event.description %></p>
+                 <p>Date: <%= event.date %></p>
+                 <p>Heure: <%= event.time %></p>
+                 <p>Statut: <%= event.status %></p>
+                 <form action="/admin/calendrier/delete/<%= event.id %>" method="POST" style="display: inline;">
+                     <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                 </form>
+             </div>
+         <% }); %>
+         <% } else { %>
+             <p>No events found.</p>
+             <% } %>    
+                        
+ </body>
+ </html>
+                   
+       
+    
+                 
+    
