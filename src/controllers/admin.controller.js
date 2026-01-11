@@ -295,20 +295,73 @@ async function showAssignCourseToUser(req, res) {
         return res.redirect('/admin');
     }
 }   
-module.exports = { 
-    showDashboard, 
-    showAddUser, 
-    addUser, 
-    deleteUser, 
-    showEditUserRole, 
-    editUserRole,  
-    showCourses, 
-    addCourse, 
-    deleteCourse, 
-    showEditCourse, 
-    editCourse, 
+async function showEnrolementPayement(req, res) {
+    const userId = req.params.id;
+    try {
+        const userToEdit = await User.db_find_user_by_id(userId);
+
+        if (!userToEdit) {
+            req.session.error = 'Utilisateur non trouvé.';
+            return res.render('admin/enrolement payement');
+        }
+        return res.render('admin/enrolement payement', {
+            user: req.session.user,
+            userToEdit: userToEdit,
+            error: null,
+            success: null,
+        });
+    } catch (err) {
+        console.error("Erreur lors de l'affichage du formulaire de modification de rôle:", err);
+        req.session.error = 'Erreur serveur.';
+        return res.redirect('/admin');
+    }
+}
+
+async function showEnrolementPayement(req, res) {
+    try {
+        // Récupérer les utilisateurs étudiants et les cours disponibles pour l'enrôlement
+        const User = require('../models/user.model');
+        const Course = require('../models/course.model');
+
+        const users = await User.db_find_all_users();
+        const courses = await Course.db_view_courses();
+
+        // Filtrer seulement les étudiants
+        const students = users.filter(user => user.role === 'student');
+
+        return res.render('admin/enrolement_payement', {
+            user: req.session.user,
+            students: students,
+            courses: courses,
+            error: null,
+            success: null
+        });
+    } catch (err) {
+        console.error('Erreur lors de l\'affichage de l\'enrôlement paiement:', err);
+        return res.status(500).render('admin/enrolement_payement', {
+            user: req.session.user,
+            students: [],
+            courses: [],
+            error: 'Erreur serveur lors du chargement des données.',
+            success: null
+        });
+    }
+}
+
+module.exports = {
+    showDashboard,
+    showAddUser,
+    addUser,
+    deleteUser,
+    showEditUserRole,
+    editUserRole,
+    showCourses,
+    addCourse,
+    deleteCourse,
+    showEditCourse,
+    editCourse,
     assignCourseToUser,
     showAssignCourseToUser,
-    
+    showEnrolementPayement
 
 };

@@ -59,6 +59,26 @@ async function showAssignCourseToUser(req, res) {
     }
 }
 
+
+async function db_find_all_assigned_courses() {
+    const sql = `
+        SELECT
+            uc.user_id,
+            u.username,
+            c.title AS course_title,
+            c.coeficient,
+            c.course_hours
+        FROM user_courses uc
+        JOIN users u ON uc.user_id = u.id
+        JOIN courses c ON uc.course_id = c.id
+        ORDER BY uc.user_id, c.title
+    `;
+    const [rows] = await db.execute(sql);
+    return rows;
+}
+
+
+
 module.exports = {
     db_insert_course,
     db_edit_course,

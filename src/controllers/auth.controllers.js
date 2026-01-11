@@ -48,6 +48,9 @@ async function login(req, res) {
             role: user.role
         };
 
+        console.log('Connexion réussie - Utilisateur:', { id: user.id, username: user.username, role: user.role });
+        console.log('Redirection vers:', user.role === 'admin' ? '/admin' : user.role === 'teacher' ? '/teacher' : '/student');
+
         if (user.role === 'admin') return res.redirect('/admin');
         if (user.role === 'teacher') return res.redirect('/teacher');
         return res.redirect('/student');

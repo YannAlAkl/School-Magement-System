@@ -18,4 +18,7 @@ router.post('/admin/courses/add', admin_controller.addCourse);
 router.post('/admin/courses/delete/:id', admin_controller.deleteCourse);
 router.get('/admin/courses/edit/:id', admin_controller.showEditCourse);
 router.post('/admin/courses/edit/:id', admin_controller.editCourse);
+router.get('/admin/enrolement/payement', admin_controller.showEnrolementPayement);
+
+
 module.exports = router;
