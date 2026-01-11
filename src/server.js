@@ -25,5 +25,6 @@ app.use(adminRoutes);
 const studentRoutes = require("./routes/student.routes");
 app.use(studentRoutes); 
 app.listen(port, () => {
-    console.log(`Le serveur est en cours d'exécution sur le port ${port}`); 
+    console.log('Server started on port 3000');
+
 });

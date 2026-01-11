@@ -302,9 +302,9 @@ async function showEnrolementPayement(req, res) {
 
         if (!userToEdit) {
             req.session.error = 'Utilisateur non trouvé.';
-            return res.render('admin/enrolement payement');
+            return res.render('admin/enrolement_payement');
         }
-        return res.render('admin/enrolement payement', {
+        return res.render('admin/enrolement_payement', {
             user: req.session.user,
             userToEdit: userToEdit,
             error: null,
@@ -348,18 +348,18 @@ async function showEnrolementPayement(req, res) {
     }
 }
 
-async function showCalendrier(req, res) {
+async function showcalendar(req, res) {
     try {
         const events = await Event.db_find_all_events();
-        return res.render('admin/calendrier', {
+        return res.render('admin/calendar', {
             user: req.session.user,
             events: events,
             error: null,
             success: null,
         });
     } catch (err) {
-        console.error("Erreur lors de l'affichage du calendrier:", err);
-        return res.status(500).render('admin/calendrier', {
+        console.error("Erreur lors de l'affichage du calendar:", err);
+        return res.status(500).render('admin/calendar', {
             user: req.session.user,
             events: [],
             error: 'Erreur serveur lors du chargement des évènements.',
@@ -380,7 +380,7 @@ async function addEvent(req, res) {
         console.error("Erreur lors de l'ajout de l'évènement:", err);
         req.session.error = 'Erreur serveur lors de l\'ajout de l\'évènement.';
     }
-    return res.redirect('/admin/calendrier');
+    return res.redirect('/admin/calendar');
 }
 async function editEvent(req, res) {
     const eventId = req.params.id;
@@ -396,7 +396,7 @@ async function editEvent(req, res) {
         console.error("Erreur lors de la mise à jour de l'évènement:", err);
         req.session.error = 'Erreur serveur lors de la mise à jour de l\'évènement.';
     }
-    return res.redirect('/admin/calendrier');
+    return res.redirect('/admin/calendar');
 }
 async function deleteEvent(req, res) {
     const eventId = req.params.id;
@@ -411,18 +411,18 @@ async function deleteEvent(req, res) {
         console.error("Erreur lors de la suppression de l'évènement:", err);
         req.session.error = "Erreur serveur lors de la suppression de l'évènement.";
     }
-    return res.redirect('/admin/calendrier');
+    return res.redirect('/admin/calendar');
 }       
 
-asyn function findEvenntByTitle(req, res) {
+async function findEvenntByTitle(req, res) {
     const eventTitle = req.params.title;
     try {
         const event = await Event.db_find_event_by_title(eventTitle);
         if (!event) {
             req.session.error = 'Évènement non trouvé.';
-            return res.render('admin/calendrier');
+            return res.render('admin/calendar');
         }
-        return res.render('admin/calendrier', {
+        return res.render('admin/calendar', {
             user: req.session.user,
             event: event,
             error: null,
@@ -431,7 +431,7 @@ asyn function findEvenntByTitle(req, res) {
     } catch (err) {
         console.error("Erreur lors de l'affichage de l'évènement:", err);
         req.session.error = 'Erreur serveur.';
-        return res.redirect('/admin/calendrier');
+        return res.redirect('/admin/calendar');
     }
 }
 
@@ -441,9 +441,9 @@ async function showEvent(req, res) {
         const event = await Event.db_find_event_by_id(eventId);
         if (!event) {
             req.session.error = 'Évènement non trouvé.';
-            return res.render('admin/calendrier');
+            return res.render('admin/calendar');
         }
-        return res.render('admin/calendrier', {
+        return res.render('admin/calendar', {
             user: req.session.user,
             event: event,
             error: null,
@@ -452,7 +452,7 @@ async function showEvent(req, res) {
     } catch (err) {
         console.error("Erreur lors de l'affichage de l'évènement:", err);
         req.session.error = 'Erreur serveur.';
-        return res.redirect('/admin/calendrier');
+        return res.redirect('/admin/calendar');
     }
 }
 
@@ -474,7 +474,7 @@ module.exports = {
     assignCourseToUser,
     showAssignCourseToUser,
     showEnrolementPayement,
-    showCalendrier,
+    showcalendar,
     addEvent,
     editEvent,
     deleteEvent,
