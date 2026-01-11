@@ -1,290 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enrôlement et Paiement</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enrôlement & Paiement</title>
+
+  <!-- Adjust path if your static is mounted differently -->
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
+
 <body>
-    <%- include('../shared/header') %>
+  <!-- Prefer absolute include -->
+ 
 
-    <div class="container">
-        <div class="card">
-            <div class="page-title">
-                <h1>Enrôlement et Paiement des Étudiants</h1>
-                <p>Gérer l'inscription des étudiants aux cours et les paiements</p>
-            </div>
+  <main class="container">
+    <div class="page-header">
+      <h1>Enrôlement & Paiement</h1>
+      <p class="muted">Assigner un étudiant à un cours et enregistrer un paiement.</p>
+    </div>
 
-            <% if (error) { %>
-                <div class="alert alert-error"><%= error %></div>
-            <% } %>
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    <% if (success) { %>
+      <div class="alert alert-success"><%= success %></div>
+    <% } %>
 
-            <% if (success) { %>
-                <div class="alert alert-success"><%= success %></div>
-            <% } %>
+    <div class="grid-2">
+      <!-- Enrollment Card -->
+      <section class="card">
+        <div class="card-title">
+          <h2>1) Enrôler un étudiant</h2>
+          <p class="muted">Sélectionnez l’étudiant et le cours à assigner.</p>
+        </div>
 
-            <div class="enrolement-section">
-                <h2>Étudiants Disponibles</h2>
-                <% if (students && students.length > 0) { %>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nom d'utilisateur</th>
-                                    <th>Email</th>
-                                    <th>Statut d'Inscription</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% students.forEach(student => { %>
-                                    <tr>
-                                        <td><%= student.id %></td>
-                                        <td><%= student.username %></td>
-                                        <td><%= student.email %></td>
-                                        <td>
-                                            <span class="status status-active">Actif</span>
-                                        </td>
-                                        <td>
-                                            <div class="actions">
-                                                <button class="btn btn-primary" onclick="showEnrolementModal(<%= student.id %>, '<%= student.username %>')">
-                                                    Gérer Enrôlement
-                                                </button>
-                                                <button class="btn btn-secondary" onclick="showPaymentModal(<%= student.id %>, '<%= student.username %>')">
-                                                    Gérer Paiement
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            </tbody>
-                        </table>
-                    </div>
-                <% } else { %>
-                    <div class="empty-state">
-                        <p>Aucun étudiant trouvé dans le système.</p>
-                        <a href="/admin/users/add" class="btn">Ajouter un étudiant</a>
-                    </div>
+        <form action="/admin/enrolement/add" method="POST" class="form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="student_id">Étudiant</label>
+              <select id="student_id" name="student_id" required>
+                <option value="" disabled selected>Choisir un étudiant…</option>
+                <% if (students && students.length) { %>
+                  <% students.forEach(s => { %>
+                    <option value="<%= s.id %>">
+                      <%= s.username %><% if (s.email) { %> — <%= s.email %><% } %>
+                    </option>
+                  <% }) %>
                 <% } %>
+              </select>
+              <small class="hint">Seuls les utilisateurs avec le rôle <strong>student</strong> apparaissent ici.</small>
             </div>
 
-            <div class="courses-section">
-                <h2>Cours Disponibles</h2>
-                <% if (courses && courses.length > 0) { %>
-                    <div class="courses-grid">
-                        <% courses.forEach(course => { %>
-                            <div class="course-card">
-                                <h3><%= course.title %></h3>
-                                <p><%= course.description %></p>
-                                <div class="course-info">
-                                    <span class="coeficient">Coef: <%= course.coeficient %></span>
-                                    <span class="hours">Heures: <%= course.course_hours %></span>
-                                </div>
-                                <div class="course-price">
-                                    Prix: <strong><%= (course.coeficient * course.course_hours * 50).toFixed(2) %> €</strong>
-                                </div>
-                            </div>
-                        <% }); %>
-                    </div>
-                <% } else { %>
-                    <div class="empty-state">
-                        <p>Aucun cours disponible.</p>
-                        <a href="/admin/courses/add" class="btn">Ajouter un cours</a>
-                    </div>
+            <div class="form-group">
+              <label for="course_id">Cours</label>
+              <select id="course_id" name="course_id" required>
+                <option value="" disabled selected>Choisir un cours…</option>
+                <% if (courses && courses.length) { %>
+                  <% courses.forEach(c => { %>
+                    <option value="<%= c.id %>"><%= c.title %></option>
+                  <% }) %>
                 <% } %>
+              </select>
+              <small class="hint">Astuce: vous pouvez gérer les cours depuis “Courses”.</small>
             </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="enroll_status">Statut</label>
+              <select id="enroll_status" name="enroll_status" required>
+                <option value="active" selected>Active</option>
+                <option value="pending">Pending</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="enroll_date">Date d’enrôlement</label>
+              <input type="date" id="enroll_date" name="enroll_date" required />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Enrôler</button>
+            <button type="reset" class="btn btn-ghost">Réinitialiser</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Payment Card -->
+      <section class="card">
+        <div class="card-title">
+          <h2>2) Enregistrer un paiement</h2>
+          <p class="muted">Associez un paiement à un étudiant (et éventuellement à un cours).</p>
         </div>
+
+        <form action="/admin/payments/add" method="POST" class="form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pay_student_id">Étudiant</label>
+              <select id="pay_student_id" name="student_id" required>
+                <option value="" disabled selected>Choisir un étudiant…</option>
+                <% if (students && students.length) { %>
+                  <% students.forEach(s => { %>
+                    <option value="<%= s.id %>">
+                      <%= s.username %><% if (s.email) { %> — <%= s.email %><% } %>
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pay_course_id">Cours (optionnel)</label>
+              <select id="pay_course_id" name="course_id">
+                <option value="" selected>Aucun (paiement global)</option>
+                <% if (courses && courses.length) { %>
+                  <% courses.forEach(c => { %>
+                    <option value="<%= c.id %>"><%= c.title %></option>
+                  <% }) %>
+                <% } %>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="amount">Montant</label>
+              <input type="number" id="amount" name="amount" min="0" step="0.01" placeholder="Ex: 150.00" required />
+            </div>
+
+            <div class="form-group">
+              <label for="currency">Devise</label>
+              <select id="currency" name="currency" required>
+                <option value="TND">TND</option>
+                <option value="EUR">EUR</option>
+                <option value="CAD">CAD</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="method">Méthode</label>
+              <select id="method" name="method" required>
+                <option value="cash">Cash</option>
+                <option value="card">Carte</option>
+                <option value="transfer">Virement</option>
+                <option value="cheque">Chèque</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="payment_date">Date</label>
+              <input type="date" id="payment_date" name="payment_date" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="payment_status">Statut</label>
+              <select id="payment_status" name="status" required>
+                <option value="paid" selected>Paid</option>
+                <option value="pending">Pending</option>
+                <option value="failed">Failed</option>
+                <option value="refunded">Refunded</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="reference">Référence (optionnel)</label>
+              <input type="text" id="reference" name="reference" placeholder="Ex: Reçu #, transaction ID..." />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="note">Note (optionnel)</label>
+            <textarea id="note" name="note" rows="3" placeholder="Commentaire interne…"></textarea>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Enregistrer paiement</button>
+            <button type="reset" class="btn btn-ghost">Réinitialiser</button>
+          </div>
+        </form>
+      </section>
     </div>
+  </main>
 
-    <!-- Modal pour l'enrôlement -->
-    <div id="enrolementModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeEnrolementModal()">&times;</span>
-            <h2>Enrôler l'étudiant: <span id="studentName"></span></h2>
-            <form id="enrolementForm">
-                <input type="hidden" id="enrolementStudentId" name="studentId">
-
-                <div class="form-group">
-                    <label for="enrolementCourse">Sélectionner un cours:</label>
-                    <select id="enrolementCourse" name="courseId" required>
-                        <option value="">Choisir un cours...</option>
-                        <% if (courses && courses.length > 0) { %>
-                            <% courses.forEach(course => { %>
-                                <option value="<%= course.id %>"><%= course.title %> - <%= (courseClose Repositor.coeficient * course.course_hours * 50).toFixed(2) %> €</option>
-                            <% }); %>
-                        <% } %>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Enrôler l'étudiant</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal pour le paiement -->
-    <div id="paymentModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closePaymentModal()">&times;</span>
-            <h2>Paiement pour l'étudiant: <span id="paymentStudentName"></span></h2>
-            <form id="paymentForm">
-                <input type="hidden" id="paymentStudentId" name="studentId">
-
-                <div class="form-group">
-                    <label for="paymentAmount">Montant (€):</label>
-                    <input type="number" id="paymentAmount" name="amount" step="0.01" min="0" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="paymentMethod">Méthode de paiement:</label>
-                    <select id="paymentMethod" name="method" required>
-                        <option value="cash">Espèces</option>
-                        <option value="card">Carte bancaire</option>
-                        <option value="transfer">Virement</option>
-                        <option value="check">Chèque</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="paymentDate">Date:</label>
-                    <input type="date" id="paymentDate" name="date" value="<%= new Date().toISOString().split('T')[0] %>" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Enregistrer le paiement</button>
-            </form>
-        </div>
-    </div>
-
-    <style>
-        .enrolement-section, .courses-section {
-            margin-top: 2rem;
-        }
-
-        .courses-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .course-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 1rem;
-            background: #f9f9f9;
-        }
-
-        .course-info {
-            display: flex;
-            justify-content: space-between;
-            margin: 0.5rem 0;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .course-price {
-            text-align: center;
-            margin-top: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-        }
-
-        .status-active {
-            background: #4CAF50;
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 8px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: black;
-        }
-    </style>
-
-    <script>
-        function showEnrolementModal(studentId, studentName) {
-            document.getElementById('enrolementModal').style.display = 'block';
-            document.getElementById('studentName').textContent = studentName;
-            document.getElementById('enrolementStudentId').value = studentId;
-        }
-
-        function closeEnrolementModal() {
-            document.getElementById('enrolementModal').style.display = 'none';
-        }
-
-        function showPaymentModal(studentId, studentName) {
-            document.getElementById('paymentModal').style.display = 'block';
-            document.getElementById('paymentStudentName').textContent = studentName;
-            document.getElementById('paymentStudentId').value = studentId;
-        }
-
-        function closePaymentModal() {
-            document.getElementById('paymentModal').style.display = 'none';
-        }
-
-        // Fermer les modals en cliquant en dehors
-        window.onclick = function(event) {
-            const enrolementModal = document.getElementById('enrolementModal');
-            const paymentModal = document.getElementById('paymentModal');
-
-            if (event.target === enrolementModal) {
-                enrolementModal.style.display = 'none';
-            }
-            if (event.target === paymentModal) {
-                paymentModal.style.display = 'none';
-            }
-        }
-
-        // Gestion des formulaires (à implémenter plus tard)
-        document.getElementById('enrolementForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Fonctionnalité d\'enrôlement à implémenter');
-            closeEnrolementModal();
-        });
-
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Fonctionnalité de paiement à implémenter');
-            closePaymentModal();
-        });
-    </script>
-
-    <%- include('../shared/footer') %>
+  <script>
+    // Auto-fill today's date for convenience
+    (function () {
+      const today = new Date().toISOString().slice(0, 10);
+      const enrollDate = document.getElementById('enroll_date');
+      const payDate = document.getElementById('payment_date');
+      if (enrollDate && !enrollDate.value) enrollDate.value = today;
+      if (payDate && !payDate.value) payDate.value = today;
+    })();
+  </script>
 </body>
 </html>
