@@ -112,7 +112,7 @@
                         <option value="">Choisir un cours...</option>
                         <% if (courses && courses.length > 0) { %>
                             <% courses.forEach(course => { %>
-                                <option value="<%= course.id %>"><%= course.title %> - <%= (course.coeficient * course.course_hours * 50).toFixed(2) %> €</option>
+                                <option value="<%= course.id %>"><%= course.title %> - <%= (courseClose Repositor.coeficient * course.course_hours * 50).toFixed(2) %> €</option>
                             <% }); %>
                         <% } %>
                     </select>
