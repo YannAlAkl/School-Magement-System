@@ -2,6 +2,68 @@ const User = require('../models/user.model');
 const Course = require('../models/course.model');
 const Event = require('../models/calendar.model');
 
+// ===== Calendar helpers =====
+function pad2(n) {
+    return String(n).padStart(2, '0');
+}
+
+function toYMD(value) {
+    // MySQL DATE can be Date or string
+    if (!value) return '';
+    const d = (value instanceof Date) ? value : new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function toHM(value) {
+    // TIME usually "HH:MM:SS" or "HH:MM"
+    if (!value) return '';
+    const s = String(value);
+    return s.length >= 5 ? s.slice(0, 5) : s;
+}
+
+function monthLabelFrom(year, monthIndex0) {
+    const labels = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    return `${labels[monthIndex0]} ${year}`;
+}
+
+function buildCalendarWeeks(year, monthIndex0, eventsByYMD) {
+    // Monday-first calendar
+    const first = new Date(year, monthIndex0, 1);
+    const last = new Date(year, monthIndex0 + 1, 0);
+
+    // Convert JS Sunday=0..Saturday=6 -> Monday=0..Sunday=6
+    const firstDay = (first.getDay() + 6) % 7;
+
+    const weeks = [];
+    let cursor = new Date(year, monthIndex0, 1 - firstDay);
+
+    for (let w = 0; w < 6; w++) {
+        const week = [];
+        for (let i = 0; i < 7; i++) {
+            const ymd = `${cursor.getFullYear()}-${pad2(cursor.getMonth() + 1)}-${pad2(cursor.getDate())}`;
+            const otherMonth = cursor.getMonth() !== monthIndex0;
+            const count = eventsByYMD.get(ymd) || 0;
+
+            week.push({
+                day: cursor.getDate(),
+                otherMonth,
+                hasEvents: count > 0,
+                count
+            });
+
+            cursor.setDate(cursor.getDate() + 1);
+        }
+        weeks.push(week);
+
+        // Optional early stop after month end if the next row starts a new week
+        if (cursor > last && ((cursor.getDay() + 6) % 7) === 0) break;
+    }
+
+    return weeks;
+}
+
+
 async function showDashboard(req, res) {
     try {
         const users = await User.db_find_all_users();
@@ -347,154 +409,213 @@ async function showEnrolementPayement(req, res) {
 }
 
 async function showcalendar(req, res) {
-    try {
-        const events = await Event.db_find_all_events();
+  try {
+    // month query param format: YYYY-MM
+    const monthParam = req.query.month;
+    const now = new Date();
 
-        const error = req.session.error || null;
-        const success = req.session.success || null;
-        req.session.error = null;
-        req.session.success = null;
+    const year = monthParam ? Number(monthParam.slice(0, 4)) : now.getFullYear();
+    const monthIndex0 = monthParam ? (Number(monthParam.slice(5, 7)) - 1) : now.getMonth();
 
-        return res.render('admin/calendar', {
-            user: req.session.user,
-            events,
-            error,
-            success,
-        });
-    } catch (err) {
-        console.error("Erreur lors de l'affichage du calendar:", err);
-        return res.status(500).render('admin/calendar', {
-            user: req.session.user,
-            events: [],
-            error: 'Erreur serveur lors du chargement des évènements.',
-            success: null,
-        });
+    const monthStart = `${year}-${pad2(monthIndex0 + 1)}-01`;
+    const monthEndDate = new Date(year, monthIndex0 + 1, 1);
+    const monthEnd = `${monthEndDate.getFullYear()}-${pad2(monthEndDate.getMonth() + 1)}-${pad2(monthEndDate.getDate())}`;
+
+    // IMPORTANT: This requires Event.db_find_events_by_month(start, end)
+    // If you don't have it yet, add it to calendar.model.js (I give you the function below).
+    const events = await Event.db_find_events_by_month(monthStart, monthEnd);
+
+    const eventsFormatted = events.map(e => ({
+      ...e,
+      date_ymd: toYMD(e.date),
+      time_hm: toHM(e.time),
+    }));
+
+    const eventsByYMD = new Map();
+    for (const e of eventsFormatted) {
+      if (!e.date_ymd) continue;
+      eventsByYMD.set(e.date_ymd, (eventsByYMD.get(e.date_ymd) || 0) + 1);
     }
+
+    const calendarWeeks = buildCalendarWeeks(year, monthIndex0, eventsByYMD);
+
+    const error = req.session.error || null;
+    const success = req.session.success || null;
+    req.session.error = null;
+    req.session.success = null;
+
+    return res.render('admin/calendar', {
+      user: req.session.user,
+      events: eventsFormatted,
+      eventToEdit: null,
+      error,
+      success,
+      selectedMonth: `${year}-${pad2(monthIndex0 + 1)}`,
+      monthLabel: monthLabelFrom(year, monthIndex0),
+      calendarWeeks,
+    });
+  } catch (err) {
+    console.error("Erreur lors de l'affichage du calendar:", err);
+    return res.status(500).render('admin/calendar', {
+      user: req.session.user,
+      events: [],
+      eventToEdit: null,
+      error: 'Erreur serveur lors du chargement des évènements.',
+      success: null,
+      selectedMonth: '',
+      monthLabel: 'Calendrier',
+      calendarWeeks: [],
+    });
+  }
 }
+
+async function showEditEvent(req, res) {
+  try {
+    const eventId = req.params.id;
+    const event = await Event.db_find_event_by_id(eventId);
+
+    if (!event) {
+      req.session.error = "Évènement non trouvé.";
+      return res.redirect('/admin/calendar');
+    }
+
+    const eventYMD = toYMD(event.date);
+    const year = Number(eventYMD.slice(0, 4));
+    const monthIndex0 = Number(eventYMD.slice(5, 7)) - 1;
+
+    const monthStart = `${year}-${pad2(monthIndex0 + 1)}-01`;
+    const monthEndDate = new Date(year, monthIndex0 + 1, 1);
+    const monthEnd = `${monthEndDate.getFullYear()}-${pad2(monthEndDate.getMonth() + 1)}-${pad2(monthEndDate.getDate())}`;
+
+    const events = await Event.db_find_events_by_month(monthStart, monthEnd);
+
+    const eventsFormatted = events.map(e => ({
+      ...e,
+      date_ymd: toYMD(e.date),
+      time_hm: toHM(e.time),
+    }));
+
+    const eventsByYMD = new Map();
+    for (const e of eventsFormatted) {
+      if (!e.date_ymd) continue;
+      eventsByYMD.set(e.date_ymd, (eventsByYMD.get(e.date_ymd) || 0) + 1);
+    }
+
+    const calendarWeeks = buildCalendarWeeks(year, monthIndex0, eventsByYMD);
+
+    return res.render('admin/calendar', {
+      user: req.session.user,
+      events: eventsFormatted,
+      eventToEdit: {
+        ...event,
+        date_ymd: toYMD(event.date),
+        time_hm: toHM(event.time),
+      },
+      error: null,
+      success: null,
+      selectedMonth: `${year}-${pad2(monthIndex0 + 1)}`,
+      monthLabel: monthLabelFrom(year, monthIndex0),
+      calendarWeeks,
+    });
+  } catch (err) {
+    console.error("Erreur showEditEvent:", err);
+    req.session.error = "Erreur serveur.";
+    return res.redirect('/admin/calendar');
+  }
+}
+
 async function addEvent(req, res) {
-    const {
-        title,
-        description,
-        date,
-        time,
-        status
-    } = req.body;
-    try {
-        const success = await Event.db_insert_event(title, description, date, time, status);
-        if (success) {
-            req.session.success = 'Évènement ajouté avec succès.';
-        } else {
-            req.session.error = "Échec de l'ajout de l'évènement.";
-        }
-    } catch (err) {
-        console.error("Erreur lors de l'ajout de l'évènement:", err);
-        req.session.error = 'Erreur serveur lors de l\'ajout de l\'évènement.';
-    }
+  const { title, description, date, time, status } = req.body;
+
+  if (!title || !description || !date || !time) {
+    req.session.error = "Tous les champs sont requis.";
     return res.redirect('/admin/calendar');
+  }
+
+  try {
+    const insertId = await Event.db_insert_event(
+      title,
+      description,
+      date,
+      time,
+      status || 'planned'
+    );
+
+    if (insertId) req.session.success = 'Évènement ajouté avec succès.';
+    else req.session.error = "Échec de l'ajout de l'évènement.";
+  } catch (err) {
+    console.error("Erreur lors de l'ajout de l'évènement:", err);
+    req.session.error = "Erreur serveur lors de l'ajout de l'évènement.";
+  }
+
+  // redirect to same month
+  const month = String(date).slice(0, 7);
+  return res.redirect(`/admin/calendar?month=${month}`);
 }
+
 async function editEvent(req, res) {
-    const eventId = req.params.id;
-    const {
-        title,
-        description,
-        date,
-        time,
-        status
-    } = req.body;
-    try {
-        const success = await Event.db_edit_event(eventId, title, description, date, time, status);
-        if (success) {
-            req.session.success = "Évènement mis à jour avec succès.";
-        } else {
-            req.session.error = "Échec de la mise à jour de l'évènement.";
-        }
-    } catch (err) {
-        console.error("Erreur lors de la mise à jour de l'évènement:", err);
-        req.session.error = 'Erreur serveur lors de la mise à jour de l\'évènement.';
-    }
+  const eventId = req.params.id;
+  const { title, description, date, time, status } = req.body;
+
+  if (!title || !description || !date || !time || !status) {
+    req.session.error = "Tous les champs sont requis.";
     return res.redirect('/admin/calendar');
+  }
+
+  try {
+    const ok = await Event.db_edit_event(eventId, title, description, date, time, status);
+    req.session[ok ? 'success' : 'error'] = ok
+      ? "Évènement mis à jour avec succès."
+      : "Échec de la mise à jour de l'évènement.";
+  } catch (err) {
+    console.error("Erreur lors de la mise à jour de l'évènement:", err);
+    req.session.error = "Erreur serveur lors de la mise à jour de l'évènement.";
+  }
+
+  const month = String(date).slice(0, 7);
+  return res.redirect(`/admin/calendar?month=${month}`);
 }
+
 async function deleteEvent(req, res) {
-    const eventId = req.params.id;
-    try {
-        const success = await Event.db_delete_event(eventId);
-        if (success) {
-            req.session.success = 'Évènement supprimé avec succès.';
-        } else {
-            req.session.error = "Échec de la suppression de l'évènement.";
-        }
-    } catch (err) {
-        console.error("Erreur lors de la suppression de l'évènement:", err);
-        req.session.error = "Erreur serveur lors de la suppression de l'évènement.";
-    }
-    return res.redirect('/admin/calendar');
+  const eventId = req.params.id;
+
+  try {
+    const ok = await Event.db_delete_event(eventId);
+    req.session[ok ? 'success' : 'error'] = ok
+      ? 'Évènement supprimé avec succès.'
+      : "Échec de la suppression de l'évènement.";
+  } catch (err) {
+    console.error("Erreur lors de la suppression de l'évènement:", err);
+    req.session.error = "Erreur serveur lors de la suppression de l'évènement.";
+  }
+
+  return res.redirect('/admin/calendar');
 }
 
-async function findEvenntByTitle(req, res) {
-    const eventTitle = req.params.title;
-    try {
-        const event = await Event.db_find_event_by_title(eventTitle);
-        if (!event) {
-            req.session.error = 'Évènement non trouvé.';
-            return res.render('admin/calendar');
-        }
-        return res.render('admin/calendar', {
-            user: req.session.user,
-            event: event,
-            error: null,
-            success: null,
-        });
-    } catch (err) {
-        console.error("Erreur lors de l'affichage de l'évènement:", err);
-        req.session.error = 'Erreur serveur.';
-        return res.redirect('/admin/calendar');
-    }
-}
-
-async function showEvent(req, res) {
-    const eventId = req.params.id;
-    try {
-        const event = await Event.db_find_event_by_id(eventId);
-        if (!event) {
-            req.session.error = 'Évènement non trouvé.';
-            return res.render('admin/calendar');
-        }
-        return res.render('admin/calendar', {
-            user: req.session.user,
-            event: event,
-            error: null,
-            success: null,
-        });
-    } catch (err) {
-        console.error("Erreur lors de l'affichage de l'évènement:", err);
-        req.session.error = 'Erreur serveur.';
-        return res.redirect('/admin/calendar');
-    }
-}
 
 
 
 
 module.exports = {
-    showDashboard,
-    showAddUser,
-    addUser,
-    deleteUser,
-    showEditUserRole,
-    editUserRole,
-    showCourses,
-    addCourse,
-    deleteCourse,
-    showEditCourse,
-    editCourse,
-    assignCourseToUser,
-    showAssignCourseToUser,
-    showEnrolementPayement,
-    showcalendar,
-    addEvent,
-    editEvent,
-    deleteEvent,
-    findEvenntByTitle,
-    showEvent,
+  showDashboard,
+  showAddUser,
+  addUser,
+  deleteUser,
+  showEditUserRole,
+  editUserRole,
+  showCourses,
+  addCourse,
+  deleteCourse,
+  showEditCourse,
+  editCourse,
+  assignCourseToUser,
+  showAssignCourseToUser,
+  showEnrolementPayement,
 
+  // Calendar
+  showcalendar,
+  showEditEvent,
+  addEvent,
+  editEvent,
+  deleteEvent,
 };
