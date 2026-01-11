@@ -19,6 +19,10 @@ router.post('/admin/courses/delete/:id', admin_controller.deleteCourse);
 router.get('/admin/courses/edit/:id', admin_controller.showEditCourse);
 router.post('/admin/courses/edit/:id', admin_controller.editCourse);
 router.get('/admin/enrolement/payement', admin_controller.showEnrolementPayement);
+router.get('/admin/calendar', admin_controller.showcalendar);
+router.post('/admin/calendar/add', admin_controller.addEvent);
+router.post('/admin/calendar/delete/:id', admin_controller.deleteEvent);
+
 
 
 module.exports = router;

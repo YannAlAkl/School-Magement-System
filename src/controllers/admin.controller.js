@@ -1,5 +1,6 @@
 const User = require('../models/user.model');
 const Course = require('../models/course.model');
+const Event = require('../models/calendar.model');
 
 async function showDashboard(req, res) {
     try {
@@ -39,7 +40,12 @@ async function showAddUser(req, res) {
 }
 
 async function addUser(req, res) {
-    const { username, email, password, role } = req.body;
+    const {
+        username,
+        email,
+        password,
+        role
+    } = req.body;
 
     if (!username || !email || !password || !role) {
         return res.status(400).render('admin/users_add', {
@@ -68,7 +74,7 @@ async function addUser(req, res) {
             error: null,
             success: 'Utilisateur ajouté avec succès.',
         });
-        
+
     } catch (err) {
         console.error("Erreur lors de l'ajout de l'utilisateur:", err);
         return res.status(500).render('admin/users_add', {
@@ -123,7 +129,9 @@ async function showEditUserRole(req, res) {
 
 async function editUserRole(req, res) {
     const userId = req.params.id;
-    const { newRole } = req.body;
+    const {
+        newRole
+    } = req.body;
 
     if (!newRole) {
         req.session.error = 'Le nouveau rôle est requis.';
@@ -146,11 +154,16 @@ async function editUserRole(req, res) {
 }
 
 async function addCourse(req, res) {
-    const { title, description, coeficient, course_hours } = req.body;
+    const {
+        title,
+        description,
+        coeficient,
+        course_hours
+    } = req.body;
     try {
         // 1. Check if course exists
         const courseExists = await Course.db_find_course_by_title(title);
-        
+
         // IMPORTANT: We need the list of courses for EVERY render of this page
         const courses = await Course.db_find_all_courses();
 
@@ -165,7 +178,7 @@ async function addCourse(req, res) {
 
         // 2. Insert the course
         await Course.db_insert_course(title, description, coeficient, course_hours);
-        
+
         // 3. Refresh the list after insertion
         const updatedCourses = await Course.db_find_all_courses();
 
@@ -175,7 +188,7 @@ async function addCourse(req, res) {
             error: null,
             success: 'Cours ajouté avec succès.',
         });
-        
+
     } catch (err) {
         console.error("Erreur lors de l'ajout du cours:", err);
         // Even on error, the view needs the courses array (even if empty)
@@ -189,7 +202,12 @@ async function addCourse(req, res) {
 }
 async function editCourse(req, res) {
     const courseId = req.params.id;
-    const { title, description, coeficient, course_hours } = req.body;
+    const {
+        title,
+        description,
+        coeficient,
+        course_hours
+    } = req.body;
     try {
         const success = await Course.db_edit_course(courseId, title, description, coeficient, course_hours);
         if (success) {
@@ -222,7 +240,7 @@ async function showEditCourse(req, res) {
         req.session.error = 'Erreur serveur.';
         return res.redirect('/admin');
     }
-}   
+}
 async function deleteCourse(req, res) {
     const courseId = req.params.id;
     try {
@@ -274,7 +292,7 @@ async function assignCourseToUser(req, res) {
         req.session.error = 'Erreur serveur lors de l\'assignation de la course.';
     }
     return res.redirect('/admin/courses');
-}   
+}
 async function showAssignCourseToUser(req, res) {
     const courseId = req.params.id;
     try {
@@ -294,28 +312,8 @@ async function showAssignCourseToUser(req, res) {
         req.session.error = 'Erreur serveur.';
         return res.redirect('/admin');
     }
-}   
-async function showEnrolementPayement(req, res) {
-    const userId = req.params.id;
-    try {
-        const userToEdit = await User.db_find_user_by_id(userId);
-
-        if (!userToEdit) {
-            req.session.error = 'Utilisateur non trouvé.';
-            return res.render('admin/enrolement_payement');
-        }
-        return res.render('admin/enrolement_payement', {
-            user: req.session.user,
-            userToEdit: userToEdit,
-            error: null,
-            success: null,
-        });
-    } catch (err) {
-        console.error("Erreur lors de l'affichage du formulaire de modification de rôle:", err);
-        req.session.error = 'Erreur serveur.';
-        return res.redirect('/admin');
-    }
 }
+
 
 async function showEnrolementPayement(req, res) {
     try {
@@ -351,11 +349,17 @@ async function showEnrolementPayement(req, res) {
 async function showcalendar(req, res) {
     try {
         const events = await Event.db_find_all_events();
+
+        const error = req.session.error || null;
+        const success = req.session.success || null;
+        req.session.error = null;
+        req.session.success = null;
+
         return res.render('admin/calendar', {
             user: req.session.user,
-            events: events,
-            error: null,
-            success: null,
+            events,
+            error,
+            success,
         });
     } catch (err) {
         console.error("Erreur lors de l'affichage du calendar:", err);
@@ -368,7 +372,13 @@ async function showcalendar(req, res) {
     }
 }
 async function addEvent(req, res) {
-    const { title, description, date, time, status } = req.body;    
+    const {
+        title,
+        description,
+        date,
+        time,
+        status
+    } = req.body;
     try {
         const success = await Event.db_insert_event(title, description, date, time, status);
         if (success) {
@@ -384,7 +394,13 @@ async function addEvent(req, res) {
 }
 async function editEvent(req, res) {
     const eventId = req.params.id;
-    const { title, description, date, time, status } = req.body;
+    const {
+        title,
+        description,
+        date,
+        time,
+        status
+    } = req.body;
     try {
         const success = await Event.db_edit_event(eventId, title, description, date, time, status);
         if (success) {
@@ -412,7 +428,7 @@ async function deleteEvent(req, res) {
         req.session.error = "Erreur serveur lors de la suppression de l'évènement.";
     }
     return res.redirect('/admin/calendar');
-}       
+}
 
 async function findEvenntByTitle(req, res) {
     const eventTitle = req.params.title;
@@ -479,6 +495,6 @@ module.exports = {
     editEvent,
     deleteEvent,
     findEvenntByTitle,
-    showEvent,      
+    showEvent,
 
 };
