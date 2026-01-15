@@ -114,7 +114,7 @@ async function register(req, res) {
     } catch (err) {
         console.log(err);
         return res.status(500).render('register', {
-            error: 'Erreur serveur'
+            error: 'Server error'
         });
     }
 }
