@@ -52,12 +52,12 @@
             </div>
 
             <div class="form-group">
-              <label for="course_id">Cours</label>
-              <select id="course_id" name="course_id" required>
+              <label for="course_title">Cours</label>
+              <select id="course_title" name="course_title" required>
                 <option value="" disabled selected>Choisir un cours…</option>
                 <% if (courses && courses.length) { %>
                   <% courses.forEach(c => { %>
-                    <option value="<%= c.id %>"><%= c.title %></option>
+                    <option value="<%= c.title %>"><%= c.title %></option>
                   <% }) %>
                 <% } %>
               </select>
@@ -93,19 +93,19 @@
       <!-- Payment Card -->
       <section class="card">
         <div class="card-title">
-          <h2>2) Enregistrer un paiement</h2>
+          <h2> 2) Enregistrer un paiement</h2>
           <p class="muted">Associez un paiement à un étudiant (et éventuellement à un cours).</p>
         </div>
 
         <form action="/admin/payments/add" method="POST" class="form">
           <div class="form-row">
             <div class="form-group">
-              <label for="pay_student_id">Étudiant</label>
-              <select id="pay_student_id" name="student_id" required>
+              <label for="pay_student_username">Étudiant</label>
+              <select id="pay_student_username" name="student_username" required>
                 <option value="" disabled selected>Choisir un étudiant…</option>
                 <% if (students && students.length) { %>
                   <% students.forEach(s => { %>
-                    <option value="<%= s.id %>">
+                    <option value="<%= s.username %>">
                       <%= s.username %><% if (s.email) { %> — <%= s.email %><% } %>
                     </option>
                   <% }) %>
@@ -114,12 +114,12 @@
             </div>
 
             <div class="form-group">
-              <label for="pay_course_id">Cours (optionnel)</label>
-              <select id="pay_course_id" name="course_id">
+              <label for="pay_course_title">Cours (optionnel)</label>
+              <select id="pay_course_title" name="course_title"></select>
                 <option value="" selected>Aucun (paiement global)</option>
                 <% if (courses && courses.length) { %>
                   <% courses.forEach(c => { %>
-                    <option value="<%= c.id %>"><%= c.title %></option>
+                    <option value="<%= c.title %>"><%= c.title %></option>
                   <% }) %>
                 <% } %>
               </select>

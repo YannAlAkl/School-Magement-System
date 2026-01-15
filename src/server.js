@@ -17,14 +17,16 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, '..', 'public')));
 const authRoutes = require("./routes/auth.routes");
-app.use(authRoutes); 
+app.use(authRoutes);
+
 const teacherRoutes = require("./routes/teacher.routes");
-app.use(teacherRoutes); 
+app.use(teacherRoutes);
 const adminRoutes = require("./routes/admin.routes");
-app.use(adminRoutes); 
+app.use(adminRoutes);
 const studentRoutes = require("./routes/student.routes");
 app.use(studentRoutes); 
 app.listen(port, () => {
     console.log('Server started on port 3000');
 
 });
+ 

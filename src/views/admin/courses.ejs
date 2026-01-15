@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-   
-
     <div class="container">
         <h1>Manage Courses</h1>
 
@@ -70,30 +68,6 @@
             <p>No courses found.</p>
         <% } %>
 
-        <!-- Assign Course to User -->
-        <h2>Assign Course to User</h2>
-        <!-- CORRIGÉ: route /admin/courses/assign -->
-        <form action="/admin/courses/assign" method="POST">
-            <div class="form-group">
-                <label for="user_id">User ID:</label>
-                <input type="number" id="user_id" name="user_id" required>
-            </div>
-            <div class="form-group">
-                <label for="course_id">Course:</label>
-                <select id="course_id" name="course_id" required>
-                    <% if (courses && courses.length > 0) { %>
-                        <% courses.forEach(course => { %>
-                            <option value="<%= course.id %>"><%= course.title %></option>
-                        <% }); %>
-                    <% } else { %>
-                        <option disabled>No courses available</option>
-                    <% } %>
-                </select>
-            </div>
-            <button type="submit">Assign Course</button>
-        </form>
     </div>
-
-
 </body>
 </html>

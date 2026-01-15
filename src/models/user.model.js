@@ -60,8 +60,14 @@ async function db_delete_user(userId) {
 
 
 async function verifyPassword(plainPassword, storedPassword) {
-    if (!storedPassword) return false; 
-    return plainPassword === storedPassword; 
+    if (!storedPassword) return false;
+    return plainPassword === storedPassword;
+}
+
+async function db_find_users_by_role(role) {
+    const sql = `SELECT * FROM users WHERE role = ?`;
+    const [rows] = await db.execute(sql, [role]);
+    return rows;
 }
 
 
@@ -75,4 +81,5 @@ module.exports = {
     db_update_user_role,
     db_delete_user,
     verifyPassword,
+    db_find_users_by_role,
 };

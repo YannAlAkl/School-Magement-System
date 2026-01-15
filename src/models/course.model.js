@@ -32,33 +32,18 @@ async function db_find_course_by_id(id) {
     return rows[0] || null;
 }
    
-async function assignCourseToUser(req, res) {
+async function db_assignCourseToUser(user_id,course_id) {
     const sql = `INSERT INTO user_courses (user_id, course_id) VALUES (?, ?)`;
-    const [result] = await db.execute(sql, [req.body.user_id, req.body.course_id]);
+    const [result] = await db.execute(sql, [user_id, course_id]);
     return result.affectedRows > 0;
 }
 
-async function showAssignCourseToUser(req, res) {
-    try {
-        const sql = `SELECT * FROM user_courses WHERE user_id = ?`;
-        const [rows] = await db.execute(sql, [req.params.id]);
-        return res.render('admin/attributes_course_to_user', {
-            user: req.session.user,
-            rows: rows,
-            error: null,
-            success: null,
-        });
-    } catch (err) {
-        console.error("Erreur lors de l'affichage des attributs du cours à l'utilisateur:", err);
-        return res.status(500).render('admin/attributes_course_to_user', {
-            user: req.session.user,
-            rows: [],
-            error: 'Erreur serveur lors du chargement des attributs du cours à l\'utilisateur.',
-            success: null,
-        });
-    }
+async function db_showAssignCourseToUser(user_id) {
+    const sql = `SELECT * FROM user_courses WHERE user_id = ?`;
+    const [rows] = await db.execute(sql, [user_id]);
+    return rows;
 }
-
+   
 
 async function db_find_all_assigned_courses() {
     const sql = `
@@ -86,6 +71,7 @@ module.exports = {
     db_find_all_courses,
     db_find_course_by_title,
     db_find_course_by_id,
-    assignCourseToUser,
-    showAssignCourseToUser,
+    db_assignCourseToUser,
+    db_showAssignCourseToUser,
+    db_find_all_assigned_courses,
 };

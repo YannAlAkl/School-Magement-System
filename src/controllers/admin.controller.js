@@ -83,11 +83,11 @@ async function showDashboard(req, res) {
             success: success,
         });
     } catch (err) {
-        console.error("Erreur lors de l'affichage du tableau de bord administrateur:", err);
+        console.error("Error showing admin dashboard:", err);
         return res.status(500).render('admin/dashboard', {
             user: req.session.user,
             users: [],
-            error: 'Erreur serveur lors du chargement des utilisateurs.',
+            error: 'Server error while loading users.',
             success: null,
         });
     }
@@ -112,7 +112,7 @@ async function addUser(req, res) {
     if (!username || !email || !password || !role) {
         return res.status(400).render('admin/users_add', {
             user: req.session.user,
-            error: 'Tous les champs sont requis.',
+            error: 'All fields are required.',
             success: null,
         });
     }
@@ -124,7 +124,7 @@ async function addUser(req, res) {
         if (userExists || emailExists) {
             return res.status(400).render('admin/users_add', {
                 user: req.session.user,
-                error: "Nom d'utilisateur ou e-mail déjà utilisé.",
+                error: "Username or email already used.",
                 success: null,
             });
         }
@@ -134,14 +134,14 @@ async function addUser(req, res) {
         return res.render('admin/dashboard', {
             user: req.session.user,
             error: null,
-            success: 'Utilisateur ajouté avec succès.',
+            success: 'User added with success.',
         });
 
     } catch (err) {
         console.error("Erreur lors de l'ajout de l'utilisateur:", err);
         return res.status(500).render('admin/users_add', {
             user: req.session.user,
-            error: "Erreur serveur lors de l'ajout de l'utilisateur.",
+            error: "Server error while adding user.",
             success: null,
         });
     }
@@ -153,16 +153,16 @@ async function deleteUser(req, res) {
     try {
         const success = await User.db_delete_user(userId);
         if (success) {
-            req.session.success = 'Utilisateur supprimé avec succès.';
+            req.session.success = 'User deleted with success.';
         } else {
-            req.session.error = "Échec de la suppression de l'utilisateur.";
+            req.session.error = "   Error deleting user.";
         }
     } catch (err) {
-        console.error("Erreur lors de la suppression de l'utilisateur:", err);
-        req.session.error = "Erreur serveur lors de la suppression de l'utilisateur.";
+        console.error("Error deleting user:", err);
+        req.session.error = "   Server error while deleting user.";
     }
 
-    return res.redirect('/admin');
+    return res.redirect('/admin/dashboard');
 }
 
 async function showEditUserRole(req, res) {
@@ -172,7 +172,7 @@ async function showEditUserRole(req, res) {
         const userToEdit = await User.db_find_user_by_id(userId);
 
         if (!userToEdit) {
-            req.session.error = 'Utilisateur non trouvé.';
+            req.session.error = '   User not found.';
             return res.render('admin/edit_role');
         }
 
@@ -183,9 +183,9 @@ async function showEditUserRole(req, res) {
             success: null,
         });
     } catch (err) {
-        console.error("Erreur lors de l'affichage du formulaire de modification de rôle:", err);
-        req.session.error = 'Erreur serveur.';
-        return res.redirect('/admin');
+        console.error("Error showing edit user role form:", err);
+        req.session.error = 'Server error.';
+        return res.redirect('/admin/dashboard');
     }
 }
 
@@ -196,23 +196,23 @@ async function editUserRole(req, res) {
     } = req.body;
 
     if (!newRole) {
-        req.session.error = 'Le nouveau rôle est requis.';
+        req.session.error = 'New role is required.';
         return res.render('/admin/edit_role');
     }
 
     try {
         const success = await User.db_update_user_role(userId, newRole);
         if (success) {
-            req.session.success = "Rôle de l'utilisateur mis à jour avec succès.";
+            req.session.success = "User role updated with success.";
         } else {
-            req.session.error = "Échec de la mise à jour du rôle de l'utilisateur.";
+            req.session.error = "Error updating user role.";
         }
     } catch (err) {
-        console.error("Erreur lors de la modification du rôle:", err);
-        req.session.error = 'Erreur serveur lors de la mise à jour du rôle.';
+        console.error("Error editing user role:", err);
+        req.session.error = 'Server error while updating user role.';
     }
 
-    return res.redirect('/admin');
+    return res.redirect('/admin/dashboard');
 }
 
 async function addCourse(req, res) {
@@ -233,7 +233,7 @@ async function addCourse(req, res) {
             return res.status(400).render('admin/courses', {
                 user: req.session.user,
                 courses: courses, // Added this
-                error: "Le cours existe déjà.",
+                error: "Course already exists.",
                 success: null,
             });
         }
@@ -248,7 +248,7 @@ async function addCourse(req, res) {
             user: req.session.user,
             courses: updatedCourses, // Added this
             error: null,
-            success: 'Cours ajouté avec succès.',
+            success: 'Course added with success.',
         });
 
     } catch (err) {
@@ -257,7 +257,7 @@ async function addCourse(req, res) {
         return res.status(500).render('admin/courses', {
             user: req.session.user,
             courses: [], // Added this to prevent EJS crash
-            error: "Erreur serveur lors de l'ajout du cours.",
+            error: "Server error while adding course.",
             success: null,
         });
     }
@@ -273,15 +273,16 @@ async function editCourse(req, res) {
     try {
         const success = await Course.db_edit_course(courseId, title, description, coeficient, course_hours);
         if (success) {
-            req.session.success = "Cours mis à jour avec succès.";
+            req.session.success = "Course updated with success.";
         } else {
-            req.session.error = "Échec de la mise à jour du cours.";
+            req.session.error = "Error updating course.";
         }
     } catch (err) {
-        console.error("Erreur lors de la modification du cours:", err);
-        req.session.error = 'Erreur serveur lors de la mise à jour du cours.';
+        console.error("Error editing course:", err);
+        req.session.error = 'Server error while updating course.';
     }
-    return res.redirect('/admin');
+    return res.redirect('/admin/courses');
+
 }
 async function showEditCourse(req, res) {
     const courseId = req.params.id;
@@ -298,9 +299,9 @@ async function showEditCourse(req, res) {
             success: null,
         });
     } catch (err) {
-        console.error("Erreur lors de l'affichage du formulaire de modification du cours:", err);
-        req.session.error = 'Erreur serveur.';
-        return res.redirect('/admin');
+        console.error("Error showing edit course form:", err);
+        req.session.error = 'Server error .';
+        return res.redirect('/admin/courses');
     }
 }
 async function deleteCourse(req, res) {
@@ -308,15 +309,15 @@ async function deleteCourse(req, res) {
     try {
         const success = await Course.db_delete_course(courseId);
         if (success) {
-            req.session.success = 'Cours supprimé avec succès.';
+            req.session.success = 'Course deleted with success.';
         } else {
-            req.session.error = "Échec de la suppression du cours.";
+            req.session.error = "Error deleting course.";
         }
     } catch (err) {
-        console.error("Erreur lors de la suppression du cours:", err);
-        req.session.error = "Erreur serveur lors de la suppression du cours.";
+        console.error("Error deleting course:", err);
+        req.session.error = "Server error while deleting course.";
     }
-    return res.redirect('/admin');
+    return res.redirect('/admin/courses');
 }
 
 async function showCourses(req, res) {
@@ -329,14 +330,23 @@ async function showCourses(req, res) {
             success: null,
         });
     } catch (err) {
-        console.error("Erreur lors de l'affichage des cours:", err);
+        console.error("Error showing courses:", err);
         return res.status(500).render('admin/courses', {
             user: req.session.user,
             courses: [],
-            error: 'Erreur serveur lors du chargement des cours.',
+            error: 'Server error while loading courses.',
             success: null,
         });
     }
+}
+
+async function showAddCourse(req, res) {
+    return res.render('admin/courses', {
+        user: req.session.user,
+        courses: [], // No courses list for add form page
+        error: null,
+        success: null,
+    });
 }
 
 async function assignCourseToUser(req, res) {
@@ -347,18 +357,18 @@ async function assignCourseToUser(req, res) {
         if (success) {
             req.session.success = 'Course assigned with success.';
         } else {
-            req.session.error = "Échec de l'assignation de la course.";
+            req.session.error = "Error assigning course.";
         }
     } catch (err) {
-        console.error("Erreur lors de l'assignation de la course:", err);
-        req.session.error = 'Erreur serveur lors de l\'assignation de la course.';
+        console.error("Error assigning course:", err);
+        req.session.error = 'Error assigning course.';
     }
     return res.redirect('/admin/courses');
 }
 async function showAssignCourseToUser(req, res) {
     const courseId = req.params.id;
     try {
-        const courseToEdit = await Course.showAssignCourseToUser(courseId);
+        const courseToEdit = await Course.db_showAssignCourseToUser(courseId);
         if (!courseToEdit) {
             req.session.error = 'Course not found.';
             return res.render('admin/courses');
@@ -370,24 +380,157 @@ async function showAssignCourseToUser(req, res) {
             success: null,
         });
     } catch (err) {
-        console.error("Erreur lors de l'affichage du formulaire de modification de rôle:", err);
-        req.session.error = 'Erreur serveur.';
-        return res.redirect('/admin');
+        console.error("Error showing edit course form:", err);
+        req.session.error = 'Server error.';
+        return res.redirect('/admin /courses'); 
     }
 }
 
+async function addEnrolement(req, res) {
+    const {
+        student_username,
+        student_id,
+        course_title,
+        enroll_status,
+        enroll_date
+    } = req.body;
+    try {
+        const success = await Course.db_addEnrolement( student_id, student_username, course_title, enroll_status, enroll_date);
+        if (success) {
+            req.session.success = 'Course assigned with success.';
+        } else {
+            req.session.error = "Error assigning course.";
+        }
+    }
+    catch (err) {
+        console.error("Error assigning course:", err);  
+        req.session.error = 'server error while assigning course.';
+    }
+    return res.redirect('/admin/enrolement/payement');
+}
+async function editEnrolement(req, res) {
+    const enrolment_id = req.params.id;
+    const {
+        student_id,
+        student_username,
+        course_title,
+        enroll_status,
+        enroll_date
+    } = req.body;
+    try {
+        const success = await Course.db_editEnrolement(enrolment_id, student_id, student_username, course_title, enroll_status, enroll_date);
+        if (success) {
+            req.session.success = 'Enrolement updated with success.';
+        } else {
+            req.session.error = "Erreur lors de la mise à jour de l'enrolment.";
+        }
+    }
+    catch (err) {
+        console.error("Error editing enrolment:", err);
+        req.session.error = 'Server error while updating enrolment.';        
+    }    
+    return res.redirect('/admin/enrolement/payement');
+}
 
+async function deleteEnrolement(req, res) {
+    const enrolment_id = req.params.id;
+    try {
+        const success = await Course.db_deleteEnrolement(enrolment_id);
+        if (success) {
+            req.session.success = 'Enrolement supprimé avec succès.';
+            return res.redirect('/admin/enrolement');
+        } else {
+            req.session.error = "Erreur lors de la suppression de l'enrolment.";
+            return res.redirect('/admin/enrolement');
+
+        }
+    }
+    catch (err) {
+        console.error("Error deleting enrolment:", err);
+        req.session.error = 'Server error while deleting enrolment.';
+        return res.redirect('/admin/enrolement');
+    }
+}
+    
+
+async function addPayment(req, res) {
+    const {
+        student_username,
+        course_title,
+        amount,
+        currency,
+        method,
+        payment_date,
+        status,
+        reference,
+        note
+        } = req.body;
+    try {
+        const success = await Course.db_addPayment(student_username, course_title, amount, currency, method, payment_date, status, reference, note);
+        if (success) {
+            req.session.success = 'Paiement enregistré avec succès.';
+        } else {
+            req.session.error = "Erreur lors de l'enregistrement du paiement.";
+        }
+    }
+    catch (err) {
+        console.error("Error adding payment:", err);
+        req.session.error = "Erreur serveur lors de l'enregistrement du paiement.";
+    }
+    return res.redirect('/admin/enrolement/payement');
+}
+
+async function editPayment(req, res) {
+    const payment_id = req.params.id;
+    const {
+        student_username,
+        course_title,
+        amount,
+        currency,
+        method,
+        payment_date,
+        status,
+        reference,
+        note
+        } = req.body;
+    try {
+        const success = await Course.db_editPayment(payment_id, student_username, course_title, amount, currency, method, payment_date, status, reference, note);
+        if (success) {
+            req.session.success = 'Paiement mis à jour avec succès.';
+        } else {
+            req.session.error = "Erreur lors de la mise à jour du paiement.";
+        }
+    }
+    catch (err) {
+        console.error("Error editing payment:", err);
+        req.session.error = 'Server error while updating payment.';
+    }
+    return res.redirect('/admin/enrolement/payement');
+}
+async function deletePayment(req, res) {
+    const payment_id = req.params.id;
+    try {
+        const success = await Course.db_deletePayment(payment_id);
+        if (success) {
+            req.session.success = 'Paiement supprimé avec succès.';
+        } else {
+            req.session.error = "Erreur lors de la suppression du paiement.";
+        }
+    }
+    catch (err) {
+        console.error("Error deleting payment:", err);
+        req.session.error = 'Server error while deleting payment.';
+    }
+    return res.redirect('/admin/enrolement/payement');   
+}   
 async function showEnrolementPayement(req, res) {
     try {
         // Récupérer les utilisateurs étudiants et les cours disponibles pour l'enrôlement
         const User = require('../models/user.model');
         const Course = require('../models/course.model');
 
-        const users = await User.db_find_all_users();
-        const courses = await Course.db_view_courses();
-
-        // Filtrer seulement les étudiants
-        const students = users.filter(user => user.role === 'student');
+        const students = await User.db_find_users_by_role('student');
+        const courses = await Course.db_find_all_courses();
 
         return res.render('admin/enrolement_payement', {
             user: req.session.user,
@@ -397,16 +540,18 @@ async function showEnrolementPayement(req, res) {
             success: null
         });
     } catch (err) {
-        console.error('Erreur lors de l\'affichage de l\'enrôlement paiement:', err);
-        return res.status(500).render('admin/enrolement_payement', {
+        console.error('Error displaying enrollment payment:', err);
+        return res.status(500).render('/admin/enrolement_payement', {
             user: req.session.user,
             students: [],
             courses: [],
-            error: 'Erreur serveur lors du chargement des données.',
+            error: 'Server error while loading data.',        
             success: null
         });
     }
 }
+
+// ===== Calendar controllers =====
 
 async function showcalendar(req, res) {
   try {
@@ -455,12 +600,12 @@ async function showcalendar(req, res) {
       calendarWeeks,
     });
   } catch (err) {
-    console.error("Erreur lors de l'affichage du calendar:", err);
+    console.error("Error displaying calendar:", err);
     return res.status(500).render('admin/calendar', {
       user: req.session.user,
       events: [],
       eventToEdit: null,
-      error: 'Erreur serveur lors du chargement des évènements.',
+      error: 'Server error while loading events.',
       success: null,
       selectedMonth: '',
       monthLabel: 'Calendrier',
@@ -475,7 +620,7 @@ async function showEditEvent(req, res) {
     const event = await Event.db_find_event_by_id(eventId);
 
     if (!event) {
-      req.session.error = "Évènement non trouvé.";
+      req.session.error = "Event not found.";
       return res.redirect('/admin/calendar');
     }
 
@@ -518,8 +663,8 @@ async function showEditEvent(req, res) {
       calendarWeeks,
     });
   } catch (err) {
-    console.error("Erreur showEditEvent:", err);
-    req.session.error = "Erreur serveur.";
+    console.error("Error showEditEvent:", err);
+    req.session.error = "Server error.";
     return res.redirect('/admin/calendar');
   }
 }
@@ -528,7 +673,7 @@ async function addEvent(req, res) {
   const { title, description, date, time, status } = req.body;
 
   if (!title || !description || !date || !time) {
-    req.session.error = "Tous les champs sont requis.";
+    req.session.error = "All fields are required.";
     return res.redirect('/admin/calendar');
   }
 
@@ -541,11 +686,11 @@ async function addEvent(req, res) {
       status || 'planned'
     );
 
-    if (insertId) req.session.success = 'Évènement ajouté avec succès.';
-    else req.session.error = "Échec de l'ajout de l'évènement.";
+    if (insertId) req.session.success = 'Event added with success.';
+    else req.session.error = "Failed to add event.";
   } catch (err) {
-    console.error("Erreur lors de l'ajout de l'évènement:", err);
-    req.session.error = "Erreur serveur lors de l'ajout de l'évènement.";
+    console.error("Error adding event:", err);
+    req.session.error = "Server error while adding event.";
   }
 
   // redirect to same month
@@ -558,18 +703,18 @@ async function editEvent(req, res) {
   const { title, description, date, time, status } = req.body;
 
   if (!title || !description || !date || !time || !status) {
-    req.session.error = "Tous les champs sont requis.";
+    req.session.error = "All fields are required.";
     return res.redirect('/admin/calendar');
   }
 
   try {
     const ok = await Event.db_edit_event(eventId, title, description, date, time, status);
     req.session[ok ? 'success' : 'error'] = ok
-      ? "Évènement mis à jour avec succès."
-      : "Échec de la mise à jour de l'évènement.";
+      ? "Event updated with success."
+      : "Failed to update event.";
   } catch (err) {
-    console.error("Erreur lors de la mise à jour de l'évènement:", err);
-    req.session.error = "Erreur serveur lors de la mise à jour de l'évènement.";
+    console.error("Error updating event:", err);
+    req.session.error = "Server error while updating event.";
   }
 
   const month = String(date).slice(0, 7);
@@ -582,40 +727,41 @@ async function deleteEvent(req, res) {
   try {
     const ok = await Event.db_delete_event(eventId);
     req.session[ok ? 'success' : 'error'] = ok
-      ? 'Évènement supprimé avec succès.'
-      : "Échec de la suppression de l'évènement.";
+      ? 'Event deleted with success.'
+      : "Failed to delete event.";
   } catch (err) {
-    console.error("Erreur lors de la suppression de l'évènement:", err);
-    req.session.error = "Erreur serveur lors de la suppression de l'évènement.";
+    console.error("Error deleting event:", err);
+    req.session.error = "Server error while deleting event.";
   }
 
   return res.redirect('/admin/calendar');
 }
 
-
-
-
-
 module.exports = {
-  showDashboard,
-  showAddUser,
-  addUser,
-  deleteUser,
-  showEditUserRole,
-  editUserRole,
-  showCourses,
-  addCourse,
-  deleteCourse,
-  showEditCourse,
-  editCourse,
-  assignCourseToUser,
-  showAssignCourseToUser,
-  showEnrolementPayement,
-
-  // Calendar
-  showcalendar,
-  showEditEvent,
-  addEvent,
-  editEvent,
-  deleteEvent,
+    showDashboard,
+    showAddUser,
+    addUser,
+    deleteUser,
+    showEditUserRole,
+    editUserRole,
+    showCourses,
+    showAddCourse,
+    addCourse,
+    deleteCourse,
+    showEditCourse,
+    editCourse,
+    assignCourseToUser,
+    showAssignCourseToUser,
+    showEnrolementPayement,
+    addEnrolement,
+    editEnrolement,
+    deleteEnrolement,
+    addPayment,
+    editPayment,
+    deletePayment,
+    showcalendar,
+    showEditEvent,
+    addEvent,
+    editEvent,
+    deleteEvent,
 };

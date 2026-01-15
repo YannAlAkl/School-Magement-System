@@ -5,24 +5,27 @@ const admin_controller = require('../controllers/admin.controller');
 
 router.use(requireRole('admin'));
 router.get('/admin', admin_controller.showDashboard);
+router.get('/admin/dashboard', admin_controller.showDashboard);
 router.get('/admin/users/add', admin_controller.showAddUser);
 router.post('/admin/users/add', admin_controller.addUser);
 router.post('/admin/users/delete/:id', admin_controller.deleteUser);
 router.get('/admin/users/edit-role/:id', admin_controller.showEditUserRole);
 router.post('/admin/users/edit-role/:id', admin_controller.editUserRole);
 router.get('/admin/courses', admin_controller.showCourses);
-router.post('/admin/courses/assign/:id', admin_controller.assignCourseToUser);
-router.get('/admin/courses/assign/:id', admin_controller.showAssignCourseToUser);
-router.get('/admin/courses/add', admin_controller.showCourses);
+router.get('/admin/courses/add', admin_controller.showAddCourse);
 router.post('/admin/courses/add', admin_controller.addCourse);
 router.post('/admin/courses/delete/:id', admin_controller.deleteCourse);
 router.get('/admin/courses/edit/:id', admin_controller.showEditCourse);
 router.post('/admin/courses/edit/:id', admin_controller.editCourse);
 router.get('/admin/enrolement/payement', admin_controller.showEnrolementPayement);
+router.post('/admin/enrolement/add', admin_controller.addEnrolement);
+router.post('/admin/enrolement/edit/:id', admin_controller.editEnrolement);
+router.post('/admin/enrolement/delete/:id', admin_controller.deleteEnrolement);
+router.post('/admin/payments/add', admin_controller.addPayment);
+router.post('/admin/payments/edit/:id', admin_controller.editPayment);
+router.post('/admin/payments/delete/:id', admin_controller.deletePayment);
 router.get('/admin/calendar', admin_controller.showcalendar);
 router.post('/admin/calendar/add', admin_controller.addEvent);
+router.post('/admin/calendar/edit/:id', admin_controller.editEvent);
 router.post('/admin/calendar/delete/:id', admin_controller.deleteEvent);
-
-
-
 module.exports = router;
