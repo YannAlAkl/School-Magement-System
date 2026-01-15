@@ -86,14 +86,6 @@ async function showRegister(req, res) {
     });     
 
 }
-
-
-
-
-
- 
-
-
 async function register(req, res) {
     const userCount = await User.db_count_users();
     if (userCount > 0) {
