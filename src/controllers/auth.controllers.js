@@ -104,7 +104,7 @@ async function register(req, res) {
         const user = await User.db_find_user_by_username(username);
         if (user) {
             return res.status(400).render('register', {
-                error: 'Nom d’utilisateur déjà utilisé'
+                error: 'Username already exists'
             });
         }
 
