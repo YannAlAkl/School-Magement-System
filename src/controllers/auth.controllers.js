@@ -37,7 +37,7 @@ async function login(req, res) {
 
         if (!userPassWord) {
             return res.status(401).render('login', {
-                error: 'Nom d’utilisateur ou mot de passe invalide'
+                error: 'user name invalid'
             });
         }
 
