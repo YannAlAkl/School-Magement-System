@@ -73,15 +73,26 @@ async function logout(req, res) {
     });
 }
 
+
+
 async function showRegister(req, res) {
     const userCount = await User.db_count_users();
     if (userCount > 0) {
-        return res.redirect('/login');
+        return res.status(403).redirect('/login');
     }
+
     return res.render('register', {
         error: null
-    });
+    });     
+
 }
+
+
+
+
+
+ 
+
 
 async function register(req, res) {
     const userCount = await User.db_count_users();
