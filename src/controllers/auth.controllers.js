@@ -96,7 +96,7 @@ async function register(req, res) {
 
     if (!username || !email || !password || confirm_password !== password) {
         return res.status(400).render('register', {
-            error: 'Champs manquants ou mots de passe non correspondants'
+            error: 'filed or passwords do not match'
         });
     }
 
