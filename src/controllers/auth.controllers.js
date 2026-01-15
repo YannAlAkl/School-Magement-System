@@ -72,9 +72,6 @@ async function logout(req, res) {
         res.redirect('/login');
     });
 }
-
-
-
 async function showRegister(req, res) {
     const userCount = await User.db_count_users();
     if (userCount > 0) {
