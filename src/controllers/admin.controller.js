@@ -438,86 +438,17 @@ async function deleteEnrolement(req, res) {
         const success = await Course.db_deleteEnrolement(enrolment_id);
         if (success) {
             req.session.success = 'Enrolement supprimé avec succès.';
+            return res.redirect('/admin/enrolement');
         } else {
             req.session.error = "Erreur lors de la suppression de l'enrolment.";
+            return res.redirect('/admin/enrolement');
+
         }
     }
     catch (err) {
         console.error("Error deleting enrolment:", err);
         req.session.error = 'Server error while deleting enrolment.';
-    }
-    return res.redirect('/admin/enrolement/payement');
-}
-
-async function showEditEnrolement(req, res) {
-    const enrolment_id = req.params.id;
-    try {
-        const User = require('../models/user.model');
-        const Course = require('../models/course.model');
-        const Enrolement = require('../models/enrolement.model');
-
-        const students = await User.db_find_users_by_role('student');
-        const courses = await Course.db_find_all_courses();
-        const enrollmentToEdit = await Enrolement.db_findEnrolementById(enrolment_id);
-        const enrollments = await Enrolement.db_showAllEnrolements();
-        const payments = await Enrolement.db_showAllPayments();
-
-        if (!enrollmentToEdit) {
-            req.session.error = 'Enrôlement non trouvé.';
-            return res.redirect('/admin/enrolement/payement');
-        }
-
-        return res.render('admin/enrolement_payement', {
-            user: req.session.user,
-            students: students,
-            courses: courses,
-            enrollments: enrollments,
-            payments: payments,
-            enrollmentToEdit: enrollmentToEdit,
-            paymentToEdit: null,
-            error: null,
-            success: null
-        });
-    } catch (err) {
-        console.error("Error showing edit enrollment form:", err);
-        req.session.error = 'Erreur lors du chargement du formulaire d\'édition.';
-        return res.redirect('/admin/enrolement/payement');
-    }
-}
-
-async function showEditPayment(req, res) {
-    const payment_id = req.params.id;
-    try {
-        const User = require('../models/user.model');
-        const Course = require('../models/course.model');
-        const Enrolement = require('../models/enrolement.model');
-
-        const students = await User.db_find_users_by_role('student');
-        const courses = await Course.db_find_all_courses();
-        const paymentToEdit = await Enrolement.db_findPaymentById(payment_id);
-        const enrollments = await Enrolement.db_showAllEnrolements();
-        const payments = await Enrolement.db_showAllPayments();
-
-        if (!paymentToEdit) {
-            req.session.error = 'Paiement non trouvé.';
-            return res.redirect('/admin/enrolement/payement');
-        }
-
-        return res.render('admin/enrolement_payement', {
-            user: req.session.user,
-            students: students,
-            courses: courses,
-            enrollments: enrollments,
-            payments: payments,
-            enrollmentToEdit: null,
-            paymentToEdit: paymentToEdit,
-            error: null,
-            success: null
-        });
-    } catch (err) {
-        console.error("Error showing edit payment form:", err);
-        req.session.error = 'Erreur lors du chargement du formulaire d\'édition.';
-        return res.redirect('/admin/enrolement/payement');
+        return res.redirect('/admin/enrolement');
     }
 }
     
@@ -597,31 +528,18 @@ async function showEnrolementPayement(req, res) {
         // Récupérer les utilisateurs étudiants et les cours disponibles pour l'enrôlement
         const User = require('../models/user.model');
         const Course = require('../models/course.model');
-        const Enrolement = require('../models/enrolement.model');
 
         const students = await User.db_find_users_by_role('student');
         const courses = await Course.db_find_all_courses();
-
-        // Récupérer tous les enrôlements et paiements
         const enrollments = await Enrolement.db_showAllEnrolements();
-        const payments = await Enrolement.db_showAllPayments();
-
-        // Récupérer les messages flash
-        const error = req.session.error || null;
-        const success = req.session.success || null;
-        req.session.error = null;
-        req.session.success = null;
 
         return res.render('admin/enrolement_payement', {
             user: req.session.user,
             students: students,
             courses: courses,
             enrollments: enrollments,
-            payments: payments,
-            enrollmentToEdit: null,
-            paymentToEdit: null,
-            error: error,
-            success: success
+            error: null,
+            success: null
         });
     } catch (err) {
         console.error('Error displaying enrollment payment:', err);
@@ -630,9 +548,6 @@ async function showEnrolementPayement(req, res) {
             students: [],
             courses: [],
             enrollments: [],
-            payments: [],
-            enrollmentToEdit: null,
-            paymentToEdit: null,
             error: 'Server error while loading data.',
             success: null
         });
@@ -844,8 +759,6 @@ module.exports = {
     addEnrolement,
     editEnrolement,
     deleteEnrolement,
-    showEditEnrolement,
-    showEditPayment,
     addPayment,
     editPayment,
     deletePayment,
