@@ -12,6 +12,7 @@ router.post('/admin/users/delete/:id', admin_controller.deleteUser);
 router.get('/admin/users/edit-role/:id', admin_controller.showEditUserRole);
 router.post('/admin/users/edit-role/:id', admin_controller.editUserRole);
 router.get('/admin/courses', admin_controller.showCourses);
+router.get('/admin/courses/add', admin_controller.showAddCourse);
 router.post('/admin/courses/add', admin_controller.addCourse);
 router.post('/admin/courses/delete/:id', admin_controller.deleteCourse);
 router.get('/admin/courses/edit/:id', admin_controller.showEditCourse);

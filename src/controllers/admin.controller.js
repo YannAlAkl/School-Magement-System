@@ -320,6 +320,15 @@ async function deleteCourse(req, res) {
     return res.redirect('/admin/courses');
 }
 
+async function showAddCourse(req, res) {
+    return res.render('admin/courses', {
+        user: req.session.user,
+        courses: [], // No courses list for add form page
+        error: null,
+        success: null,
+    });
+}
+
 async function showCourses(req, res) {
     try {
         const courses = await Course.db_find_all_courses();
@@ -824,6 +833,7 @@ module.exports = {
     showEditUserRole,
     editUserRole,
     showCourses,
+    showAddCourse,
     addCourse,
     deleteCourse,
     showEditCourse,
