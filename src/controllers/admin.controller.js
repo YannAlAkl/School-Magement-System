@@ -340,15 +340,6 @@ async function showCourses(req, res) {
     }
 }
 
-async function showAddCourse(req, res) {
-    return res.render('admin/courses', {
-        user: req.session.user,
-        courses: [], // No courses list for add form page
-        error: null,
-        success: null,
-    });
-}
-
 async function assignCourseToUser(req, res) {
     const courseId = req.body.course_id;
     const userId = req.body.user_id;
@@ -531,21 +522,24 @@ async function showEnrolementPayement(req, res) {
 
         const students = await User.db_find_users_by_role('student');
         const courses = await Course.db_find_all_courses();
+        const enrollments = await Enrolement.db_showAllEnrolements();
 
         return res.render('admin/enrolement_payement', {
             user: req.session.user,
             students: students,
             courses: courses,
+            enrollments: enrollments,
             error: null,
             success: null
         });
     } catch (err) {
         console.error('Error displaying enrollment payment:', err);
-        return res.status(500).render('/admin/enrolement_payement', {
+        return res.status(500).render('admin/enrolement_payement', {
             user: req.session.user,
             students: [],
             courses: [],
-            error: 'Server error while loading data.',        
+            enrollments: [],
+            error: 'Server error while loading data.',
             success: null
         });
     }
@@ -745,7 +739,6 @@ module.exports = {
     showEditUserRole,
     editUserRole,
     showCourses,
-    showAddCourse,
     addCourse,
     deleteCourse,
     showEditCourse,
