@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enrôlement & Paiements</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  <!-- Variables pour éviter les erreurs -->
+  <% var enrollments = typeof enrollments !== "undefined" ? enrollments : []; %>
+  <% var payments = typeof payments !== "undefined" ? payments : []; %>
+  <% var enrollmentToEdit = typeof enrollmentToEdit !== "undefined" ? enrollmentToEdit : null; %>
+  <% var paymentToEdit = typeof paymentToEdit !== "undefined" ? paymentToEdit : null; %>
+
+  <main class="container">
+
+    <div class="page-header">
+      <h1>Enrôlement & Paiements</h1>
+      <p class="muted">Gérez les inscriptions des élèves aux cours et les paiements associés.</p>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <% if (success) { %>
+      <div class="alert alert-success"><%= success %></div>
+    <% } %>
+
+    <div class="grid-2">
+
+      <!-- SECTION 1 : FORMULAIRE ENRÔLEMENT -->
+      <section class="card">
+        <div class="card-title">
+          <h2><%= enrollmentToEdit ? 'Modifier l\'enrôlement' : 'Ajouter un enrôlement' %></h2>
+          <p class="muted">Inscrivez un élève à un cours.</p>
+        </div>
+
+        <form action="<%= enrollmentToEdit ? `/admin/enrolement/edit/${enrollmentToEdit.id}` : '/admin/enrolement/add' %>" method="POST" class="form">
+          <input type="hidden" name="student_username" id="student_username" value="<%= enrollmentToEdit ? enrollmentToEdit.student_username : '' %>">
+
+          <div class="form-group">
+            <label for="student_id">Élève</label>
+            <select id="student_id" name="student_id" required onchange="updateStudentUsername()">
+              <option value="" disabled <%= !enrollmentToEdit ? 'selected' : '' %>>Choisir un élève…</option>
+              <% students.forEach(s => { %>
+                <option value="<%= s.id %>" data-username="<%= s.username %>" <%= enrollmentToEdit && enrollmentToEdit.student_id == s.id ? 'selected' : '' %>>
+                  <%= s.username %> <% if (s.email) { %> — <%= s.email %> <% } %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="course_title">Cours</label>
+            <select id="course_title" name="course_title" required>
+              <option value="" disabled <%= !enrollmentToEdit ? 'selected' : '' %>>Choisir un cours…</option>
+              <% courses.forEach(c => { %>
+                <option value="<%= c.title %>" <%= enrollmentToEdit && enrollmentToEdit.course_title === c.title ? 'selected' : '' %>>
+                  <%= c.title %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="enroll_date">Date d'enrôlement</label>
+            <input type="date" id="enroll_date" name="enroll_date" value="<%= enrollmentToEdit ? enrollmentToEdit.enroll_date : '' %>" required />
+          </div>
+
+          <div class="form-group">
+            <label for="enroll_status">Statut</label>
+            <select id="enroll_status" name="enroll_status">
+              <option value="pending" <%= enrollmentToEdit && enrollmentToEdit.enroll_status === 'pending' ? 'selected' : '' %>>En attente</option>
+              <option value="approved" <%= enrollmentToEdit && enrollmentToEdit.enroll_status === 'approved' ? 'selected' : '' %>>Approuvé</option>
+              <option value="rejected" <%= enrollmentToEdit && enrollmentToEdit.enroll_status === 'rejected' ? 'selected' : '' %>>Rejeté</option>
+              <option value="completed" <%= enrollmentToEdit && enrollmentToEdit.enroll_status === 'completed' ? 'selected' : '' %>>Terminé</option>
+            </select>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">
+              <%= enrollmentToEdit ? 'Modifier l\'enrôlement' : 'Ajouter l\'enrôlement' %>
+            </button>
+            <% if (enrollmentToEdit) { %>
+              <a href="/admin/enrolement/payement" class="btn btn-secondary">Annuler</a>
+            <% } %>
+          </div>
+        </form>
+      </section>
+
+      <!-- SECTION 2 : LISTE DES ENRÔLEMENTS -->
+      <section class="card">
+        <div class="card-title">
+          <h2>Enrôlements existants</h2>
+          <p class="muted">Liste de tous les enrôlements avec options de modification/suppression.</p>
+        </div>
+
+        <% if (enrollments.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Élève</th>
+                  <th>Cours</th>
+                  <th>Statut</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% enrollments.forEach(e => { %>
+                  <tr>
+                    <td><%= e.student_username %></td>
+                    <td><%= e.course_title %></td>
+                    <td>
+                      <span class="badge badge-<%= e.enroll_status === 'approved' ? 'success' : e.enroll_status === 'pending' ? 'warning' : e.enroll_status === 'rejected' ? 'error' : 'info' %>">
+                        <%= e.enroll_status %>
+                      </span>
+                    </td>
+                    <td><%= new Date(e.enroll_date).toLocaleDateString('fr-FR') %></td>
+                    <td>
+                      <div class="btn-group">
+                        <form action="/admin/enrolement/edit/<%= e.id %>" method="GET" style="display: inline;">
+                          <button type="submit" class="btn btn-sm btn-warning">Modifier</button>
+                        </form>
+                        <form action="/admin/enrolement/delete/<%= e.id %>" method="POST" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet enrôlement ?')">
+                          <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <p class="muted">Aucun enrôlement trouvé.</p>
+        <% } %>
+      </section>
+
+    </div>
+
+    <!-- SECTION 3 : PAIEMENTS -->
+    <section class="card" style="margin-top: 2rem;">
+      <div class="card-title">
+        <h2><%= paymentToEdit ? 'Modifier le paiement' : 'Ajouter un paiement' %></h2>
+        <p class="muted">Enregistrez les paiements des élèves pour leurs cours.</p>
+      </div>
+
+      <form action="<%= paymentToEdit ? `/admin/payments/edit/${paymentToEdit.id}` : '/admin/payments/add' %>" method="POST" class="form">
+        <div class="grid-3">
+          <div class="form-group">
+            <label for="payment_student_username">Élève</label>
+            <select id="payment_student_username" name="student_username" required>
+              <option value="" disabled <%= !paymentToEdit ? 'selected' : '' %>>Choisir un élève…</option>
+              <% students.forEach(s => { %>
+                <option value="<%= s.username %>" <%= paymentToEdit && paymentToEdit.student_username === s.username ? 'selected' : '' %>>
+                  <%= s.username %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="payment_course_title">Cours</label>
+            <select id="payment_course_title" name="course_title" required>
+              <option value="" disabled <%= !paymentToEdit ? 'selected' : '' %>>Choisir un cours…</option>
+              <% courses.forEach(c => { %>
+                <option value="<%= c.title %>" <%= paymentToEdit && paymentToEdit.course_title === c.title ? 'selected' : '' %>>
+                  <%= c.title %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="amount">Montant</label>
+            <input type="number" id="amount" name="amount" step="0.01" min="0" value="<%= paymentToEdit ? paymentToEdit.amount : '' %>" required />
+          </div>
+
+          <div class="form-group">
+            <label for="currency">Devise</label>
+            <select id="currency" name="currency">
+              <option value="USD" <%= paymentToEdit && paymentToEdit.currency === 'USD' ? 'selected' : '' %>>USD</option>
+              <option value="EUR" <%= paymentToEdit && paymentToEdit.currency === 'EUR' ? 'selected' : '' %>>EUR</option>
+              <option value="XAF" <%= paymentToEdit && paymentToEdit.currency === 'XAF' ? 'selected' : '' %>>XAF</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="method">Méthode</label>
+            <select id="method" name="method" required>
+              <option value="cash" <%= paymentToEdit && paymentToEdit.method === 'cash' ? 'selected' : '' %>>Espèces</option>
+              <option value="credit_card" <%= paymentToEdit && paymentToEdit.method === 'credit_card' ? 'selected' : '' %>>Carte de crédit</option>
+              <option value="debit_card" <%= paymentToEdit && paymentToEdit.method === 'debit_card' ? 'selected' : '' %>>Carte de débit</option>
+              <option value="paypal" <%= paymentToEdit && paymentToEdit.method === 'paypal' ? 'selected' : '' %>>PayPal</option>
+              <option value="bank_transfer" <%= paymentToEdit && paymentToEdit.method === 'bank_transfer' ? 'selected' : '' %>>Virement bancaire</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="payment_date">Date du paiement</label>
+            <input type="date" id="payment_date" name="payment_date" value="<%= paymentToEdit ? paymentToEdit.payment_date : '' %>" required />
+          </div>
+
+          <div class="form-group">
+            <label for="status">Statut</label>
+            <select id="status" name="status" required>
+              <option value="pending" <%= paymentToEdit && paymentToEdit.status === 'pending' ? 'selected' : '' %>>En attente</option>
+              <option value="completed" <%= paymentToEdit && paymentToEdit.status === 'completed' ? 'selected' : '' %>>Terminé</option>
+              <option value="failed" <%= paymentToEdit && paymentToEdit.status === 'failed' ? 'selected' : '' %>>Échoué</option>
+              <option value="refunded" <%= paymentToEdit && paymentToEdit.status === 'refunded' ? 'selected' : '' %>>Remboursé</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="reference">Référence</label>
+            <input type="text" id="reference" name="reference" value="<%= paymentToEdit ? paymentToEdit.reference : '' %>" />
+          </div>
+
+          <div class="form-group">
+            <label for="note">Note</label>
+            <textarea id="note" name="note" rows="2"><%= paymentToEdit ? paymentToEdit.note : '' %></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">
+            <%= paymentToEdit ? 'Modifier le paiement' : 'Ajouter le paiement' %>
+          </button>
+          <% if (paymentToEdit) { %>
+            <a href="/admin/enrolement/payement" class="btn btn-secondary">Annuler</a>
+          <% } %>
+        </div>
+      </form>
+    </section>
+
+    <!-- SECTION 4 : LISTE DES PAIEMENTS -->
+    <% if (payments.length > 0) { %>
+      <section class="card" style="margin-top: 2rem;">
+        <div class="card-title">
+          <h2>Paiements enregistrés</h2>
+          <p class="muted">Historique des paiements avec options de modification.</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Élève</th>
+                <th>Cours</th>
+                <th>Montant</th>
+                <th>Méthode</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% payments.forEach(p => { %>
+                <tr>
+                  <td><%= p.student_username %></td>
+                  <td><%= p.course_title %></td>
+                  <td><%= p.amount %> <%= p.currency %></td>
+                  <td><%= p.method %></td>
+                  <td>
+                    <span class="badge badge-<%= p.status === 'completed' ? 'success' : p.status === 'pending' ? 'warning' : p.status === 'failed' ? 'error' : 'info' %>">
+                      <%= p.status %>
+                    </span>
+                  </td>
+                  <td><%= new Date(p.payment_date).toLocaleDateString('fr-FR') %></td>
+                  <td>
+                    <div class="btn-group">
+                      <form action="/admin/payments/edit/<%= p.id %>" method="GET" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-warning">Modifier</button>
+                      </form>
+                      <form action="/admin/payments/delete/<%= p.id %>" method="POST" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    <% } %>
+
+  </main>
+
+  <script>
+    // Fonction pour mettre à jour automatiquement le username de l'élève
+    function updateStudentUsername() {
+      const select = document.getElementById('student_id');
+      const usernameInput = document.getElementById('student_username');
+      const selectedOption = select.options[select.selectedIndex];
+      if (selectedOption && selectedOption.value) {
+        usernameInput.value = selectedOption.getAttribute('data-username');
+      }
+    }
+
+    // Définir la date du jour par défaut
+    (function () {
+      const today = new Date().toISOString().slice(0, 10);
+      const enrollDate = document.getElementById('enroll_date');
+      const paymentDate = document.getElementById('payment_date');
+
+      if (enrollDate && !enrollDate.value) enrollDate.value = today;
+      if (paymentDate && !paymentDate.value) paymentDate.value = today;
+    })();
+  </script>
+
+</body>
+</html>

@@ -52,6 +52,25 @@ async function db_deletePayment(payment_id) {
     const [result] = await db.execute(sql, [payment_id]);
     return result.affectedRows > 0;
 }
+
+async function db_showAllPayments() {
+    const sql = `SELECT * FROM payments ORDER BY payment_date DESC`;
+    const [rows] = await db.execute(sql);
+    return rows;
+}
+
+async function db_findPaymentById(payment_id) {
+    const sql = `SELECT * FROM payments WHERE id = ?`;
+    const [rows] = await db.execute(sql, [payment_id]);
+    return rows[0];
+}
+
+async function db_findEnrolementById(enrolment_id) {
+    const sql = `SELECT * FROM enrolements WHERE id = ?`;
+    const [rows] = await db.execute(sql, [enrolment_id]);
+    return rows[0];
+}
+
 module.exports = {
     db_addEnrolement,
     db_findEnrolementsByUser,
@@ -62,4 +81,7 @@ module.exports = {
     db_showAllEnrolements,
     db_editPayment,
     db_deletePayment,
+    db_showAllPayments,
+    db_findPaymentById,
+    db_findEnrolementById,
 };

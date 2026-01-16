@@ -3,7 +3,7 @@ const db = require('../db');
 async function db_insert_event(title, description, date, time, status) {
   const sql = `INSERT INTO events (title, description, date, time, status) VALUES (?, ?, ?, ?, ?)`;
   const [result] = await db.execute(sql, [title, description, date, time, status]);
-  return result.insertId; // number
+  return result.insertId; 
 }
 
 async function db_edit_event(id, title, description, date, time, status) {
