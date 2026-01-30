@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enrollment & Payment</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+<main class="container">
+
+    <div class="page-header">
+        <h1>Enrollment & Payment</h1>
+        <p class="muted">Assign students to courses and manage payments.</p>
+    </div>
+
+    <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <% if (success) { %>
+        <div class="alert alert-success"><%= success %></div>
+    <% } %>
+
+    <div class="grid-2">
+
+        <!-- ================= ENROLL STUDENT ================= -->
+        <section class="card">
+            <div class="card-title">
+                <h2>1) Enroll a student</h2>
+                <p class="muted">Select student and course.</p>
+            </div>
+
+            <form action="/admin/enrolment/add" method="POST" class="form">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Student</label>
+                        <select name="student_username" required>
+                            <option disabled selected>Choose a student…</option>
+                            <% students.forEach(s => { %>
+                                <option value="<%= s.username %>">
+                                    <%= s.username %> — <%= s.email %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Course</label>
+                        <select name="course_title" required>
+                            <option disabled selected>Choose a course…</option>
+                            <% courses.forEach(c => { %>
+                                <option value="<%= c.title %>"><%= c.title %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="enroll_status">
+                            <option value="active" selected>Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Enrollment date</label>
+                        <input type="date" id="enroll_date" name="enroll_date" required>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-primary">Enroll student</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ================= PAYMENT ================= -->
+        <section class="card">
+            <div class="card-title">
+                <h2>2) Record a payment</h2>
+            </div>
+
+            <form action="/admin/payments/add" method="POST" class="form">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Student</label>
+                        <select id="pay_student_username" name="student_username" required>
+                            <option disabled selected>Choose a student…</option>
+                            <% students.forEach(s => { %>
+                                <option value="<%= s.username %>"><%= s.username %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Course (optional)</label>
+                        <select name="course_title">
+                            <option value="">No course</option>
+                            <% courses.forEach(c => { %>
+                                <option value="<%= c.title %>"><%= c.title %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" step="0.01" id="amount" name="amount" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="payment_date" name="payment_date" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status">
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                            <option value="failed">Failed</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reference</label>
+                        <input type="text" name="reference">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Note</label>
+                    <textarea name="note"></textarea>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-primary">Record payment</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <!-- ================= ENROLLMENTS TABLE ================= -->
+    <section class="card">
+        <h2>Enrollments</h2>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% if (enrolments && enrolments.length > 0) { %>
+                <% enrolments.forEach(e => { %>
+                    <tr>
+                        <td><%= e.student_username %></td>
+                        <td><%= e.course_title %></td>
+                        <td><%= e.enroll_status %></td>
+                        <td><%= e.enroll_date %></td>
+                        <td class="actions-inline">
+                            <a class="btn btn-sm btn-secondary" href="/admin/enrolment/edit/<%= e.enrolment_id %>">Edit</a>
+                            <form method="POST" action="/admin/enrolment/delete/<%= e.enrolment_id %>" style="display:inline;" onsubmit="return confirm('Delete enrollment?')">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 20px;">Aucune inscription trouvée.</td>
+                </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ================= PAYMENTS TABLE ================= -->
+    <section class="card">
+        <h2>Payments</h2>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% if (payments && payments.length > 0) { %>
+                <% payments.forEach(p => { %>
+                    <tr>
+                        <td><%= p.student_username %></td>
+                        <td><%= p.course_title || '—' %></td>
+                        <td><%= p.amount %></td>
+                        <td><%= p.status %></td>
+                        <td><%= p.payment_date %></td>
+                        <td class="actions-inline">
+                            <a class="btn btn-sm btn-secondary" href="/admin/payments/edit/<%= p.payment_id %>">Edit</a>
+                            <form method="POST" action="/admin/payments/delete/<%= p.payment_id %>" style="display:inline;" onsubmit="return confirm('Delete payment?')">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px;">Aucun paiement trouvé.</td>
+                </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+<script>
+    // Auto date
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById('enrol_date').value = today;
+    document.getElementById('payment_date').value = today;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendrier (Admin)</title>
+
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <h1>Calendrier</h1>
+        <p class="muted">Gérer les évènements (ajout, modification, suppression).</p>
+      </div>
+
+      <div class="header-actions">
+        <form action="/admin/calendar" method="GET" class="inline">
+          <label class="sr-only" for="month">Mois</label>
+          <input type="month" id="month" name="month" value="<%= selectedMonth %>" />
+          <button class="btn btn-ghost" type="submit">Afficher</button>
+        </form>
+      </div>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    <% if (success) { %>
+      <div class="alert alert-success"><%= success %></div>
+    <% } %>
+
+    <div class="grid-2">
+      <!-- LEFT: Add / Edit -->
+      <section class="card">
+        <div class="card-title">
+          <h2><%= eventToEdit ? 'Modifier un évènement' : 'Ajouter un évènement' %></h2>
+          <p class="muted">
+            <%= eventToEdit ? 'Mettez à jour les champs puis validez.' : 'Renseignez les informations puis validez.' %>
+          </p>
+        </div>
+
+        <form
+          class="form"
+          action="<%= eventToEdit ? ('/admin/calendar/edit/' + eventToEdit.id) : '/admin/calendar/add' %>"
+          method="POST"
+        >
+          <div class="form-group">
+            <label for="title">Titre</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              required
+              value="<%= eventToEdit ? eventToEdit.title : '' %>"
+              placeholder="Ex: Réunion parents, Exam, Cours spécial..."
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              rows="4"
+              required
+              placeholder="Détails de l’évènement..."
+            ><%= eventToEdit ? eventToEdit.description : '' %></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="date">Date</label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                required
+                value="<%= eventToEdit ? eventToEdit.date_ymd : '' %>"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="time">Heure</label>
+              <input
+                type="time"
+                id="time"
+                name="time"
+                required
+                value="<%= eventToEdit ? eventToEdit.time_hm : '' %>"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="status">Statut</label>
+              <select id="status" name="status" required>
+                <option value="planned" <%= (eventToEdit && eventToEdit.status === 'planned') ? 'selected' : '' %>>planned</option>
+                <option value="done" <%= (eventToEdit && eventToEdit.status === 'done') ? 'selected' : '' %>>done</option>
+                <option value="canceled" <%= (eventToEdit && eventToEdit.status === 'canceled') ? 'selected' : '' %>>canceled</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <% if (eventToEdit) { %>
+                <a class="btn btn-ghost" href="/admin/calendar">Annuler édition</a>
+              <% } else { %>
+                <button class="btn btn-ghost" type="reset">Réinitialiser</button>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">
+              <%= eventToEdit ? 'Enregistrer' : 'Ajouter' %>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- RIGHT: Month mini-calendar + list -->
+      <section class="card">
+        <div class="card-title">
+          <h2><%= monthLabel %></h2>
+          <p class="muted">Vue mensuelle + liste des évènements.</p>
+        </div>
+
+        <!-- Mini calendar -->
+        <div class="mini-calendar">
+          <div class="mini-calendar-weekdays">
+            <div>Lu</div><div>Ma</div><div>Me</div><div>Je</div><div>Ve</div><div>Sa</div><div>Di</div>
+          </div>
+
+          <div class="mini-calendar-days">
+            <% calendarWeeks.forEach(week => { %>
+              <% week.forEach(cell => { %>
+                <div class="mini-day <%= cell.otherMonth ? 'other-month' : '' %> <%= cell.hasEvents ? 'has-event' : '' %>">
+                  <span class="mini-num"><%= cell.day %></span>
+                  <% if (cell.hasEvents) { %>
+                    <span class="mini-dot" title="<%= cell.count %> évènement(s)"></span>
+                  <% } %>
+                </div>
+              <% }) %>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Events list -->
+        <div class="events-list">
+          <% if (events && events.length > 0) { %>
+            <% events.forEach(ev => { %>
+              <div class="event-row">
+                <div class="event-main">
+                  <div class="event-top">
+                    <h3 class="event-title"><%= ev.title %></h3>
+                    <span class="badge <%= ev.status %>"><%= ev.status %></span>
+                  </div>
+
+                  <p class="event-desc"><%= ev.description %></p>
+
+                  <div class="event-meta">
+                    <span>📅 <%= ev.date_ymd %></span>
+                    <span>⏰ <%= ev.time_hm %></span>
+                  </div>
+                </div>
+
+                <div class="event-actions">
+                  <a class="btn btn-ghost" href="/admin/calendar/edit/<%= ev.id %>">Edit</a>
+
+                  <form action="/admin/calendar/delete/<%= ev.id %>" method="POST" class="inline">
+                    <button class="btn btn-danger" type="submit" onclick="return confirm('Supprimer cet évènement ?')">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="muted">Aucun évènement pour ce mois.</p>
+          <% } %>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Prefill today's date/time for convenience when adding new event
+    (function () {
+      const title = document.getElementById('title');
+      const date = document.getElementById('date');
+      const time = document.getElementById('time');
+
+      // Only prefill if we're in "add" mode (empty fields)
+      if (title && !title.value) {
+        const now = new Date();
+        const ymd = now.toISOString().slice(0, 10);
+        const hm = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        if (date && !date.value) date.value = ymd;
+        if (time && !time.value) time.value = hm;
+      }
+    })();
+  </script>
+</body>
+</html>

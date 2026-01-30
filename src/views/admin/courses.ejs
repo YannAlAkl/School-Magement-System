@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Courses</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Manage Courses</h1>
+
+        <% if (error) { %>
+            <div class="alert alert-error"><%= error %></div>
+        <% } %>
+        <% if (success) { %>
+            <div class="alert alert-success"><%= success %></div>
+        <% } %>
+
+        <!-- Add Course Form -->
+        <h2>Add New Course</h2>
+        <form action="/admin/courses/add" method="POST" >
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="coeficient">Coeficient:</label>
+                <input type="number" id="coeficient" name="coeficient" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="course_hours">Course Hours:</label>
+                <input type="number" id="course_hours" name="course_hours" required>
+            </div>
+            <div class="form-group">
+                <label for="Course Price">Course Price:</label>
+                <input type="number" id="course_price" name="course_price" step="0.01" required>    
+            </div>
+            <button type="submit">Add Course</button>
+        </form>
+
+        <!-- List Courses -->
+        <h2>Existing Courses</h2>
+        <% if (courses && courses.length > 0) { %>
+            <% courses.forEach(course => { %>
+                <div class="course-item">
+                    <h3><%= course.title %></h3>
+                    <p><%= course.description %></p>
+                    <p>Coeficient: <%= course.coeficient %></p>
+                    <p>Hours: <%= course.course_hours %></p>
+                    
+                    <!-- Edit Form -->
+                    <form action="/admin/courses/edit/<%= course.id %>" method="POST" style="display: inline;">
+                        <input type="text" name="title" value="<%= course.title %>" required>
+                        <textarea name="description" required><%= course.description %></textarea>
+                        <input type="number" name="coeficient" value="<%= course.coeficient %>" step="0.01" required>
+                        <input type="number" name="course_hours" value="<%= course.course_hours %>" required>
+                        <button type="submit">Update</button>
+                    </form>
+
+                    <!-- Delete Form -->
+                    <form action="/admin/courses/delete/<%= course.id %>" method="POST" style="display: inline;">
+                        <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p>No courses found.</p>
+        <% } %>
+
+    </div>
+</body>
+</html>

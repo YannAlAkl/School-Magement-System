@@ -1,0 +1,349 @@
+/* =========================
+   Global Design System
+   ========================= */
+:root {
+  --bg: #0b1220;
+  --card: rgba(17, 26, 46, 0.88);
+  --card-solid: #111a2e;
+  --border: rgba(255, 255, 255, 0.10);
+
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.70);
+
+  --accent: #4f8cff;
+  --accent2: #8c4fff;
+
+  --danger: #ff4d4d;
+  --success: #39d98a;
+  --warning: #ffcc66;
+
+  --shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+
+  --radius: 14px;
+  --radius-sm: 10px;
+
+  --pad: 22px;
+  --pad-sm: 14px;
+
+  --maxw: 1100px;
+  --maxw-auth: 420px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 600px at 20% 10%, rgba(79,140,255,0.22), transparent 60%),
+    radial-gradient(900px 500px at 80% 20%, rgba(140,79,255,0.18), transparent 55%),
+    var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* =========================
+   Layout Helpers
+   ========================= */
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 18px;
+}
+
+.center-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+  padding: var(--pad);
+}
+
+.card-sm {
+  max-width: var(--maxw-auth);
+  width: 100%;
+}
+
+/* =========================
+   Typography
+   ========================= */
+h1, h2, h3 {
+  margin: 0 0 10px 0;
+  letter-spacing: 0.2px;
+}
+
+h1 { font-size: 28px; }
+h2 { font-size: 20px; color: var(--text); }
+p { margin: 0 0 10px 0; color: var(--muted); }
+
+a {
+  color: rgba(79, 140, 255, 0.95);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+/* =========================
+   Nav / Header (optional)
+   ========================= */
+.topbar {
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+  background: rgba(11, 18, 32, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.topbar-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.4px;
+}
+
+.navlinks a {
+  margin-left: 12px;
+  color: var(--muted);
+}
+.navlinks a:hover { color: var(--text); }
+
+/* =========================
+   Forms
+   ========================= */
+.form-group {
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  outline: none;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(79, 140, 255, 0.7);
+  box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.18);
+}
+
+/* =========================
+   Buttons
+   ========================= */
+.btn, button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 11px 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+
+  color: white;
+  font-weight: 650;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+}
+
+.btn:hover, button:hover {
+  filter: brightness(1.06);
+}
+
+.btn:disabled, button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.10);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: rgba(255,77,77,0.18);
+  border: 1px solid rgba(255,77,77,0.45);
+  color: var(--text);
+}
+
+.btn-danger:hover {
+  filter: brightness(1.08);
+}
+
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.actions-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.actions-inline form {
+  display: inline;
+  margin: 0;
+}
+
+/* Make form buttons full-width if you want */
+.btn-block {
+  width: 100%;
+}
+
+/* =========================
+   Alerts / Messages
+   ========================= */
+.alert {
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  margin: 10px 0 14px 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.alert-error {
+  background: rgba(255, 77, 77, 0.12);
+  border-color: rgba(255, 77, 77, 0.35);
+}
+
+.alert-success {
+  background: rgba(57, 217, 138, 0.12);
+  border-color: rgba(57, 217, 138, 0.35);
+}
+
+.alert-warning {
+  background: rgba(255, 204, 102, 0.12);
+  border-color: rgba(255, 204, 102, 0.35);
+}
+
+/* =========================
+   Tables (dashboard lists)
+   ========================= */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,0.03);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+th, td {
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  background: rgba(255,255,255,0.04);
+}
+
+tr:hover td {
+  background: rgba(255,255,255,0.03);
+}
+
+/* Small inline actions in tables */
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.actions form {
+  display: inline;
+  margin: 0;
+}
+
+/* =========================
+   Page sections
+   ========================= */
+.page-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.page-title .subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* =========================
+   Auth page helper classes
+   ========================= */
+.auth-title {
+  margin: 0 0 6px 0;
+}
+
+.auth-subtitle {
+  margin: 0 0 18px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+
+.auth-footer {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* =========================
+   Responsive tweaks
+   ========================= */
+@media (max-width: 520px) {
+  .card { padding: 16px; }
+  table { min-width: 520px; }
+}

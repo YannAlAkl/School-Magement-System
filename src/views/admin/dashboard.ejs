@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">School Management System</div>
+      <div class="navlinks">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/courses/">Course</a>
+        <a href="/admin/users/add">Add user</a>
+        <a href="/admin/calendar">Calendar</a>
+        <a href="/admin/enrolment">Enrolment</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+
+      <div class="page-title">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p class="subtitle">
+            Connected as <strong><%= user.username %></strong> (<%= user.role %>)
+          </p>
+        </div>
+
+        <div>
+          <a class="btn" href="/admin/users/add">+ Add User</a>
+        </div>
+      </div>
+
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <% if (success) { %>
+        <div class="alert alert-success"><%= success %></div>
+      <% } %>
+
+      <h2>Users</h2>
+
+     <!-- <% if (!users || users.length === 0) { %>
+        <p>No users found.</p>
+      <% } else { %> -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th style="width: 220px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% users.forEach(u => { %>
+                <tr>
+                  <td><%= u.id %></td>
+                  <td><%= u.username %></td>
+                  <td><%= u.email %></td>
+                  <td><%= u.role %></td>
+                  <td>
+                    <div class="actions">
+                      <a class="btn btn-secondary" href="/admin/users/edit-role/<%= u.id %>">Edit role</a>
+
+                      <form action="/admin/users/delete/<%= u.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this user?');">
+                        <button class="btn btn-danger" type="submit">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <!-- <% } %> -->
+
+    </div>
+  </div>
+</body>
+</html>
