@@ -29,7 +29,7 @@ async function db_find_events_by_month(monthStart, monthEnd) {
   const [rows] = await db.execute(sql, [monthStart, monthEnd]);
   return rows;
 }
-
+//TODO FIX CALENDAR
 async function db_find_event_by_id(id) {
   const sql = `SELECT * FROM events WHERE id = ?`;
   const [rows] = await db.execute(sql, [id]);
