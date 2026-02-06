@@ -275,7 +275,7 @@ async function editCourse(req, res) {
     const { title, description, coeficient, course_hours } = req.body; 
 
     try {
-        const success = await Course.db_update_course(courseId, title, description, coeficient, course_hours); 
+        const success = await Course.db_edit_course(courseId, title, description, coeficient, course_hours); 
         if (success) {
             req.session.success = "Course updated with success.";
         } else {

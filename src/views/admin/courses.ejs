@@ -45,32 +45,44 @@
 
         <!-- List Courses -->
         <h2>Existing Courses</h2>
-        <% if (courses && courses.length > 0) { %>
-            <% courses.forEach(course => { %>
-                <div class="course-item">
-                    <h3><%= course.title %></h3>
-                    <p><%= course.description %></p>
-                    <p>Coeficient: <%= course.coeficient %></p>
-                    <p>Hours: <%= course.course_hours %></p>
-                    
-                    <!-- Edit Form -->
-                    <form action="/admin/courses/edit/<%= course.id %>" method="POST" style="display: inline;">
-                        <input type="text" name="title" value="<%= course.title %>" required>
-                        <textarea name="description" required><%= course.description %></textarea>
-                        <input type="number" name="coeficient" value="<%= course.coeficient %>" step="0.01" required>
-                        <input type="number" name="course_hours" value="<%= course.course_hours %>" required>
-                        <button type="submit">Update</button>
-                    </form>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Coeficient</th>
+                <th>Course Hours</th>
+                <th>Course Price</th>
+                <th style="width: 220px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% courses.forEach(u => { %>
+                <tr>
+                  <td><%= u.id %></td>
+                  <td><%= u.title %></td>
+                  <td><%= u.description %></td>
+                  <td><%= u.coeficient %></td>
+                  <td><%= u.course_hours %></td>
+                  <td><%= u.course_price %></td>
 
-                    <!-- Delete Form -->
-                    <form action="/admin/courses/delete/<%= course.id %>" method="POST" style="display: inline;">
-                        <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
-                    </form>
-                </div>
-            <% }); %>
-        <% } else { %>
-            <p>No courses found.</p>
-        <% } %>
+                  <td>
+                    <div class="actions">
+                      <a class="btn btn-secondary" href="/admin/courses/edit/<%= u.id %>">Edit Course</a>
+
+                      <form action="/admin/courses/delete/<%= u.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this course?');">
+                        <button class="btn btn-danger" type="submit">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+       
 
     </div>
 </body>
