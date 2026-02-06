@@ -1,15 +1,15 @@
 const db = require('../db');
 
-async function db_insert_course(title, description, coeficient, course_hours, created_at, course_price) {
-    const sql = `INSERT INTO courses (title, description, coeficient, course_hours, created_at, course_price) VALUES (?, ?, ?, ?, ?, ?)`;
-    const [result] = await db.execute(sql, [title, description, coeficient, course_hours, created_at, course_price]);
+async function db_insert_course(title, description, coeficient, course_hours, course_price) {
+    const sql = `INSERT INTO courses (title, description, coeficient, course_hours, course_price) VALUES (?, ?, ?, ?, ?)`;
+    const [result] = await db.execute(sql, [title, description, coeficient, course_hours, course_price]);
     return result.insertId;
 }
 
-async function db_edit_course(id, title, description, coeficient, course_hours , created_at, course_price) {
+async function db_edit_course(id, title, description, coeficient, course_hours, created_at, course_price) {
     const sql = `UPDATE courses SET title = ?, description = ?, coeficient = ?, course_hours = ?, created_at = ?, course_price = ? WHERE id = ?`;
     const [result] = await db.execute(sql, [title, description, coeficient, course_hours, created_at, course_price, id]);
-    return result.affectedRows > 0; 
+    return result.affectedRows > 0;
 }
 
 async function db_delete_course(id) {
@@ -101,7 +101,7 @@ async function db_showAllPaymentsByCourse(course_title) {
 async function db_calculateStudentTotalAmount(student_username) {
     const sql = `SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE student_username = ?`;
     const [rows] = await db.execute(sql, [student_username]);
-    return rows[0]?.total || 0;
+    return rows[0] ?.total || 0;
 }
 
 async function db_getEnrollmentPageData() {
@@ -109,7 +109,7 @@ async function db_getEnrollmentPageData() {
     const courses = await db_find_all_courses();
     const enrolments = await db_find_all_enrolments();
     const payments = await db_show_all_payments();
-    
+
     return {
         students: users.filter(u => u.role === 'student'),
         courses: courses,

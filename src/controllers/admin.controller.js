@@ -244,9 +244,10 @@ async function deleteUser(req, res) {
     return res.redirect('/admin/dashboard');
 }
 async function addCourse(req, res) {
-    const { title, description, coeficient, course_hours, created_at ,course_price } = req.body;
+    const { title, description, coeficient, course_hours, course_price } = req.body;
+    console.log("Received course data:", { title, description, coeficient, course_hours, course_price });
     try { 
-        await Course.db_insert_course(title, description, coeficient, course_hours, created_at, course_price);
+        await Course.db_insert_course(title, description, coeficient, course_hours, course_price);
         const courses = await Course.db_find_all_courses();
         return res.render('admin/courses', {
             user: req.session.user,
