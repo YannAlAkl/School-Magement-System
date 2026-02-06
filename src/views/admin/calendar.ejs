@@ -4,13 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calendrier (Admin)</title>
-
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
-  
-
   <main class="container">
     <div class="page-header">
       <div>
@@ -18,11 +15,17 @@
         <p class="muted">Gérer les évènements (ajout, modification, suppression).</p>
       </div>
 
-      <div class="header-actions">
-        <form action="/admin/calendar" method="GET" class="inline">
+      <div class="header-actions"> 
+        <form action="/admin/calendar" method="GET" class="inline" style="display: flex; align-items: center; gap: 10px; width: 1060px;">
           <label class="sr-only" for="month">Mois</label>
-          <input type="month" id="month" name="month" value="<%= selectedMonth %>" />
-          <button class="btn btn-ghost" type="submit">Afficher</button>
+          <input 
+            type="month" 
+            id="month" 
+            name="month" 
+            value="<%= selectedMonth %>" 
+            style="width: 100%; height: 40px; padding: 0 10px; box-sizing: border-box;" 
+          />
+          <button class="btn btn-ghost" type="submit" style="height: 40px; white-space: nowrap;">Afficher</button>
         </form>
       </div>
     </div>
@@ -34,7 +37,7 @@
       <div class="alert alert-success"><%= success %></div>
     <% } %>
 
-    <div class="grid-2">
+    <div class="grid-2"> 
       <!-- LEFT: Add / Edit -->
       <section class="card">
         <div class="card-title">
@@ -44,55 +47,25 @@
           </p>
         </div>
 
-        <form
-          class="form"
-          action="<%= eventToEdit ? ('/admin/calendar/edit/' + eventToEdit.id) : '/admin/calendar/add' %>"
-          method="POST"
-        >
+        <form class="form" action="<%= eventToEdit ? ('/admin/calendar/edit/' + eventToEdit.id) : '/admin/calendar/add' %>" method="POST">
           <div class="form-group">
             <label for="title">Titre</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              required
-              value="<%= eventToEdit ? eventToEdit.title : '' %>"
-              placeholder="Ex: Réunion parents, Exam, Cours spécial..."
-            />
+            <input type="text" id="title" name="title" required value="<%= eventToEdit ? eventToEdit.title : '' %>" placeholder="Ex: Réunion parents..." />
           </div>
 
           <div class="form-group">
             <label for="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              rows="4"
-              required
-              placeholder="Détails de l’évènement..."
-            ><%= eventToEdit ? eventToEdit.description : '' %></textarea>
+            <textarea id="description" name="description" rows="4" required placeholder="Détails..."><%= eventToEdit ? eventToEdit.description : '' %></textarea>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="date">Date</label>
-              <input
-                type="date"
-                id="date"
-                name="date"
-                required
-                value="<%= eventToEdit ? eventToEdit.date_ymd : '' %>"
-              />
+              <input type="date" id="date" name="date" required value="<%= eventToEdit ? eventToEdit.date_ymd : '' %>" />
             </div>
-
             <div class="form-group">
               <label for="time">Heure</label>
-              <input
-                type="time"
-                id="time"
-                name="time"
-                required
-                value="<%= eventToEdit ? eventToEdit.time_hm : '' %>"
-              />
+              <input type="time" id="time" name="time" required value="<%= eventToEdit ? eventToEdit.time_hm : '' %>" />
             </div>
           </div>
 
@@ -105,7 +78,6 @@
                 <option value="canceled" <%= (eventToEdit && eventToEdit.status === 'canceled') ? 'selected' : '' %>>canceled</option>
               </select>
             </div>
-
             <div class="form-group">
               <label>&nbsp;</label>
               <% if (eventToEdit) { %>
@@ -115,91 +87,63 @@
               <% } %>
             </div>
           </div>
-
           <div class="actions">
-            <button type="submit" class="btn btn-primary">
-              <%= eventToEdit ? 'Enregistrer' : 'Ajouter' %>
-            </button>
+            <button type="submit" class="btn btn-primary"><%= eventToEdit ? 'Enregistrer' : 'Ajouter' %></button>
           </div>
         </form>
       </section>
 
-      <!-- RIGHT: Month mini-calendar + list -->
+      <!-- RIGHT: Mini-calendar modified with detailed event info -->
       <section class="card">
         <div class="card-title">
           <h2><%= monthLabel %></h2>
-          <p class="muted">Vue mensuelle + liste des évènements.</p>
+          <p class="muted">Vue mensuelle détaillée.</p>
         </div>
-
-        <!-- Mini calendar -->
         <div class="mini-calendar">
           <div class="mini-calendar-weekdays">
-            <div>Lu</div><div>Ma</div><div>Me</div><div>Je</div><div>Ve</div><div>Sa</div><div>Di</div>
+            <div>Dim</div><div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div>
           </div>
-
           <div class="mini-calendar-days">
             <% calendarWeeks.forEach(week => { %>
               <% week.forEach(cell => { %>
-                <div class="mini-day <%= cell.otherMonth ? 'other-month' : '' %> <%= cell.hasEvents ? 'has-event' : '' %>">
+                <div class="mini-day <%= cell.otherMonth ? 'other-month' : '' %> <%= cell.isToday ? 'today' : '' %>">
                   <span class="mini-num"><%= cell.day %></span>
-                  <% if (cell.hasEvents) { %>
-                    <span class="mini-dot" title="<%= cell.count %> évènement(s)"></span>
+                  
+                  <% if (cell.hasEvents && cell.events) { %>
+                    <div class="mini-events-list" style="margin-top: 5px;">
+                      <% cell.events.forEach(ev => { %>
+                        <div class="mini-event-box" style="border-left: 3px solid #007bff; padding-left: 6px; margin-bottom: 8px; background: rgba(0,123,255,0.05);">
+                          <div class="mini-event-info">
+                            <div style="font-size: 10px; font-weight: bold; color: #666;"><%= ev.time_hm %></div>
+                            <div style="font-size: 11px; font-weight: 600; color: #333; line-height: 1.2; margin-bottom: 4px;">
+                              <%= ev.title %>
+                            </div>
+                          </div>
+                          <div class="mini-event-actions" style="display: flex; gap: 5px;">
+                            <a href="/admin/calendar/edit/<%= ev.id %>" style="text-decoration:none; font-size: 10px; color: #007bff;">Modifier</a>
+                            <form action="/admin/calendar/delete/<%= ev.id %>" method="POST" style="display:inline;">
+                              <button type="submit" onclick="return confirm('Supprimer ?')" style="border:none; background:none; color:red; cursor:pointer; font-size: 10px; padding: 0;">Suppr.</button>
+                            </form>
+                          </div>
+                        </div>
+                      <% }) %>
+                    </div>
                   <% } %>
+
                 </div>
               <% }) %>
             <% }) %>
           </div>
         </div>
-
-        <div class="divider"></div>
-
-        <!-- Events list -->
-        <div class="events-list">
-          <% if (events && events.length > 0) { %>
-            <% events.forEach(ev => { %>
-              <div class="event-row">
-                <div class="event-main">
-                  <div class="event-top">
-                    <h3 class="event-title"><%= ev.title %></h3>
-                    <span class="badge <%= ev.status %>"><%= ev.status %></span>
-                  </div>
-
-                  <p class="event-desc"><%= ev.description %></p>
-
-                  <div class="event-meta">
-                    <span>📅 <%= ev.date_ymd %></span>
-                    <span>⏰ <%= ev.time_hm %></span>
-                  </div>
-                </div>
-
-                <div class="event-actions">
-                  <a class="btn btn-ghost" href="/admin/calendar/edit/<%= ev.id %>">Edit</a>
-
-                  <form action="/admin/calendar/delete/<%= ev.id %>" method="POST" class="inline">
-                    <button class="btn btn-danger" type="submit" onclick="return confirm('Supprimer cet évènement ?')">
-                      Delete
-                    </button>
-                  </form>
-                </div>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <p class="muted">Aucun évènement pour ce mois.</p>
-          <% } %>
-        </div>
-
       </section>
     </div>
   </main>
 
   <script>
-    // Prefill today's date/time for convenience when adding new event
     (function () {
       const title = document.getElementById('title');
       const date = document.getElementById('date');
       const time = document.getElementById('time');
-
-      // Only prefill if we're in "add" mode (empty fields)
       if (title && !title.value) {
         const now = new Date();
         const ymd = now.toISOString().slice(0, 10);

@@ -1,14 +1,13 @@
 const db = require('../db');
-
-async function db_insert_event(title, description, date, time, status) {
-  const sql = `INSERT INTO events (title, description, date, time, status) VALUES (?, ?, ?, ?, ?)`;
-  const [result] = await db.execute(sql, [title, description, date, time, status]);
+async function db_insert_event(title, description, date, time, status, created_at, updated_at) {
+  const sql = `INSERT INTO events (title, description, date, time, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const [result] = await db.execute(sql, [title, description, date, time, status, created_at, updated_at]);
   return result.insertId; 
 }
 
-async function db_edit_event(id, title, description, date, time, status) {
-  const sql = `UPDATE events SET title = ?, description = ?, date = ?, time = ?, status = ? WHERE id = ?`;
-  const [result] = await db.execute(sql, [title, description, date, time, status, id]);
+async function db_edit_event(id, title, description, date, time, status, created_at, updated_at) {
+  const sql = `UPDATE events SET title = ?, description = ?, date = ?, time = ?, status = ?, created_at = ?, updated_at = ? WHERE id = ?`;
+  const [result] = await db.execute(sql, [title, description, date, time, status, created_at, updated_at, id]);
   return result.affectedRows > 0;
 }
 

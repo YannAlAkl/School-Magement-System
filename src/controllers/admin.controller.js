@@ -244,9 +244,9 @@ async function deleteUser(req, res) {
     return res.redirect('/admin/dashboard');
 }
 async function addCourse(req, res) {
-    const { title, description, coeficient, course_hours } = req.body;  
+    const { title, description, coeficient, course_hours, created_at ,course_price } = req.body;
     try { 
-        const course = await Course.db_insert_course(title, description, coeficient, course_hours);
+        await Course.db_insert_course(title, description, coeficient, course_hours, created_at, course_price);
         const courses = await Course.db_find_all_courses();
         return res.render('admin/courses', {
             user: req.session.user,
@@ -273,7 +273,6 @@ async function editCourse(req, res) {
     const { title, description, coeficient, course_hours } = req.body; 
 
     try {
-        // Assume a model function exists
         const success = await Course.db_update_course(courseId, title, description, coeficient, course_hours); 
         if (success) {
             req.session.success = "Course updated with success.";
@@ -572,13 +571,14 @@ async function getStudentTotalAmount(req, res) {
     try {
         const student_username = req.params.username;
         const total = await Course.db_calculateStudentTotalAmount(student_username);
-   
-        return res.json({ totalAmount: total });
-    } catch (err) {
-        console.error("Error calculating student total amount:", err);
-        return res.status(500).json({ error: 'Erreur serveur' });
+        return res.json({ success: true, total: total || 0 });
+    } catch (error) {
+        console.error("Erreur calcul montant:", error);
+        res.status(500).json({ success: false, error: "Impossible de calculer le montant." });
     }
 }
+
+
 
 async function showEnrolmentPaiement(req, res) {
     try {
@@ -607,25 +607,28 @@ async function showEnrolmentPaiement(req, res) {
     }
 }
 
-
 async function showcalendar(req, res) {
   try {
     const monthParam = req.query.month;
     const now = new Date();
 
+
     const year = monthParam ? Number(monthParam.slice(0, 4)) : now.getFullYear();
     const monthIndex0 = monthParam ? (Number(monthParam.slice(5, 7)) - 1) : now.getMonth();
 
+    // Définir selectedMonth pour l'input type="month"
+    const selectedMonth = monthParam || `${year}-${pad2(monthIndex0 + 1)}`;
+
     const monthStart = `${year}-${pad2(monthIndex0 + 1)}-01`;
-    const monthEndDate = new Date(year, monthIndex0 + 1, 1);
-    const monthEnd = `${monthEndDate.getFullYear()}-${pad2(monthEndDate.getMonth() + 1)}-${pad2(monthEndDate.getDate())}`;
+    const lastDay = new Date(year, monthIndex0 + 1, 0).getDate(); 
+    const monthEnd = `${year}-${pad2(monthIndex0 + 1)}-${pad2(lastDay)}`;
 
     const events = await Event.db_find_events_by_month(monthStart, monthEnd);
 
     const eventsFormatted = events.map(e => ({
       ...e,
       date_ymd: toYMD(e.date),
-      time_formatted: toHM(e.time)
+      time_hm: toHM(e.time) 
     }));
 
     const eventsByYMD = new Map();
@@ -635,16 +638,14 @@ async function showcalendar(req, res) {
     }
 
     const weeks = buildCalendarWeeks(year, monthIndex0, eventsByYMD);
-
     const label = monthLabelFrom(year, monthIndex0);
-
     return res.render('admin/calendar', {
       user: req.session.user,
-      weeks,
-      label,
-      prevMonth: monthIndex0 === 0 ? `${year - 1}-12` : `${year}-${pad2(monthIndex0)}`,
-      nextMonth: monthIndex0 === 11 ? `${year + 1}-01` : `${year}-${pad2(monthIndex0 + 2)}`,
-      error: null,
+      calendarWeeks: weeks,
+      monthLabel: label, 
+      selectedMonth: selectedMonth, 
+      eventToEdit: null,         
+      error:null,
       success: null,
       events: eventsFormatted
     });
@@ -653,6 +654,7 @@ async function showcalendar(req, res) {
     return res.status(500).send("Error loading calendar: " + err.message);
   }
 }
+
 
 async function showEditEvent(req, res) {
   const eventId = req.params.id;
@@ -676,9 +678,26 @@ async function showEditEvent(req, res) {
 }
 
 async function addEvent(req, res) {
-  const { title, description, date, time } = req.body;
+  const { 
+    title, 
+    description, 
+    date, 
+    time, 
+    status, 
+    created_at = new Date(), 
+    updated_at = new Date() 
+  } = req.body;
+
   try {
-    await Event.db_insert_event(title, description, date, time);
+    await Event.db_insert_event(
+      title || null, 
+      description || null, 
+      date || null, 
+      time || null, 
+      status || null, 
+      created_at, 
+      updated_at
+    );
     req.session.success = 'Event added successfully.';
   } catch (err) {
     console.error("Error adding event:", err);
@@ -686,6 +705,7 @@ async function addEvent(req, res) {
   }
   return res.redirect('/admin/calendar');
 }
+
 
 async function editEvent(req, res) {
   const eventId = req.params.id;

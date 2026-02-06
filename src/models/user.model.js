@@ -1,36 +1,27 @@
 const db = require('../db');
-
 async function db_find_user_by_username(username) {
     const sql = `SELECT * FROM users WHERE username = ?`; 
     const [rows] = await db.execute(sql, [username]); 
     const user = rows[0]; 
     return user ? user : null; 
 }
-
-
 async function db_find_user_by_id(id) {
     const sql = `SELECT * FROM users WHERE id = ?`;
     const [rows] = await db.execute(sql, [id]);
     const user = rows[0];
     return user ? user : null;
 }
-
-
 async function db_find_user_by_email(email) {
     const sql = `SELECT * FROM users WHERE email = ?`; 
     const [rows] = await db.execute(sql, [email]); 
     const user = rows[0]; 
     return user ? user : null; 
 }
-
-
 async function db_insert_user(username, email, password, role) {
     const sql = `INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)`; 
     const [result] = await db.execute(sql, [username, email, password, role]); 
     return result.insertId; 
 }
-
-
 async function db_count_users() {
     const sql = `SELECT COUNT(*) AS count FROM users`; 
     const [rows] = await db.execute(sql); 
@@ -69,8 +60,6 @@ async function db_find_users_by_role(role) {
     const [rows] = await db.execute(sql, [role]);
     return rows;
 }
-
-
 module.exports = {
     db_find_user_by_username,
     db_find_user_by_id,
