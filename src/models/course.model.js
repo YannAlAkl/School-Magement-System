@@ -6,9 +6,9 @@ async function db_insert_course(title, description, coeficient, course_hours, co
     return result.insertId;
 }
 
-async function db_edit_course(id, title, description, coeficient, course_hours, created_at, course_price) {
-    const sql = `UPDATE courses SET title = ?, description = ?, coeficient = ?, course_hours = ?, created_at = ?, course_price = ? WHERE id = ?`;
-    const [result] = await db.execute(sql, [title, description, coeficient, course_hours, created_at, course_price, id]);
+async function db_edit_course(id, title, description, coeficient, course_hours, course_price) {
+    const sql = `UPDATE courses SET title = ?, description = ?, coeficient = ?, course_hours = ?, course_price = ? WHERE id = ?`;
+    const [result] = await db.execute(sql, [title, description, coeficient, course_hours, course_price, id]);
     return result.affectedRows > 0;
 }
 
