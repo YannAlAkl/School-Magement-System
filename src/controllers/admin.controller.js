@@ -269,6 +269,7 @@ async function addCourse(req, res) {
     }
 }
 
+//fixed the add
 async function editCourse(req, res) {
     const courseId = req.params.id; 
     const { title, description, coeficient, course_hours } = req.body; 
