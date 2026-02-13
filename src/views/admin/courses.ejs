@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="container">
+<<<<<<< HEAD
         <div class="card">
             <div class="page-title">
                 <div>
@@ -16,6 +17,83 @@
                 </div>
                 <button class="btn" onclick="openModal('addCourseModal', this)">+ Add Course</button>
             </div>
+=======
+        <h1>Manage Courses</h1>
+
+        <% if (error) { %>
+            <div class="alert alert-error"><%= error %></div>
+        <% } %>
+        <% if (success) { %>
+            <div class="alert alert-success"><%= success %></div>
+        <% } %>
+
+        <!-- Add Course Form -->
+        <h2>Add New Course</h2>
+        <form action="/admin/courses/add" method="POST" >
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="coeficient">Coeficient:</label>
+                <input type="number" id="coeficient" name="coeficient" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="course_hours">Course Hours:</label>
+                <input type="number" id="course_hours" name="course_hours" required>
+            </div>
+            <div class="form-group">
+                <label for="Course Price">Course Price:</label>
+                <input type="number" id="course_price" name="course_price" step="0.01" required>    
+            </div>
+            <button type="submit">Add Course</button>
+        </form>
+
+        <!-- List Courses -->
+        <h2>Existing Courses</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Coeficient</th>
+                <th>Course Hours</th>
+                <th>Course Price</th>
+                <th style="width: 220px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% courses.forEach(u => { %>
+                <tr>
+                  <td><%= u.id %></td>
+                  <td><%= u.title %></td>
+                  <td><%= u.description %></td>
+                  <td><%= u.coeficient %></td>
+                  <td><%= u.course_hours %></td>
+                  <td><%= u.course_price %></td>
+
+                  <td>
+                    <div class="actions">
+                      <a class="btn btn-secondary" href="/admin/courses/edit/<%= u.id %>">Edit Course</a>
+
+                      <form action="/admin/courses/delete/<%= u.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this course?');">
+                        <button class="btn btn-danger" type="submit">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+       
+>>>>>>> d165cbe8dc259a270835f521a7feace92368838d
 
             <% if (error) { %>
                 <div class="alert alert-error"><%= error %></div>

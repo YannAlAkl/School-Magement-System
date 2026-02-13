@@ -330,10 +330,48 @@ async function showAllCourses(req, res) {
     }
 }
 
+<<<<<<< HEAD
 /**
  * Show course edit form
  * GET /admin/courses/:title
  */
+=======
+//fixed the add
+async function editCourse(req, res) {
+    const courseId = req.params.id; 
+    const { title, description, coeficient, course_hours } = req.body; 
+
+    try {
+        const success = await Course.db_edit_course(courseId, title, description, coeficient, course_hours); 
+        if (success) {
+            req.session.success = "Course updated with success.";
+        } else {
+            req.session.error = "Error updating course.";
+        }
+    }
+    catch (err) {
+        console.error("Error editing course:", err);
+        req.session.error = 'Server error while updating course.';
+    }    
+    return res.redirect('/admin/courses'); 
+}
+
+async function deleteCourse(req, res) {
+    const courseId = req.params.id;
+    try {
+        const success = await Course.db_delete_course(courseId);
+        if (success) {
+            req.session.success = 'Course deleted with success.';
+        } else {
+            req.session.error = "Error deleting course.";
+        }
+    } catch (err) {
+        console.error("Error deleting course:", err);
+        req.session.error = "Server error while deleting course.";
+    }
+    return res.redirect('/admin/courses');
+}
+>>>>>>> d165cbe8dc259a270835f521a7feace92368838d
 async function showCourseByTitle(req, res) {
     const courseTitle = req.params.title;
     try {
