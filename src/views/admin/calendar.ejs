@@ -6,15 +6,13 @@
   <title>Calendrier (Admin)</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-
 <body>
   <main class="container">
     <div class="page-header">
       <div>
         <h1>Calendrier</h1>
-        <p class="muted">Gérer les évènements (ajout, modification, suppression).</p>
+        <p class="muted">Gérer les'événements (ajout, modification, suppression).</p>
       </div>
-
       <div class="header-actions"> 
         <form action="/admin/calendar" method="GET" class="inline" style="display: flex; align-items: center; gap: 10px; width: 1060px;">
           <label class="sr-only" for="month">Mois</label>
@@ -38,34 +36,34 @@
     <% } %>
 
     <div class="grid-2"> 
-      <!-- LEFT: Add / Edit -->
+      <!-- GAUCHE : Formulaire d'ajout/édition -->
       <section class="card">
         <div class="card-title">
-          <h2><%= eventToEdit ? 'Modifier un évènement' : 'Ajouter un évènement' %></h2>
+          <h2>Ajouter un évenement </h2>
           <p class="muted">
-            <%= eventToEdit ? 'Mettez à jour les champs puis validez.' : 'Renseignez les informations puis validez.' %>
+            Renseignez les informations puis validez.
           </p>
         </div>
 
-        <form class="form" action="<%= eventToEdit ? ('/admin/calendar/edit/' + eventToEdit.id) : '/admin/calendar/add' %>" method="POST">
+        <form class="form" action="/admin/calendar/add" method="POST">
           <div class="form-group">
             <label for="title">Titre</label>
-            <input type="text" id="title" name="title" required value="<%= eventToEdit ? eventToEdit.title : '' %>" placeholder="Ex: Réunion parents..." />
+            <input type="text" id="title" name="title" required placeholder="Ex: Réunion parents..." />
           </div>
 
           <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" rows="4" required placeholder="Détails..."><%= eventToEdit ? eventToEdit.description : '' %></textarea>
+            <textarea id="description" name="description" rows="4" required placeholder="Détails..."></textarea>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="date">Date</label>
-              <input type="date" id="date" name="date" required value="<%= eventToEdit ? eventToEdit.date_ymd : '' %>" />
+              <input type="date" id="date" name="date" required />
             </div>
             <div class="form-group">
               <label for="time">Heure</label>
-              <input type="time" id="time" name="time" required value="<%= eventToEdit ? eventToEdit.time_hm : '' %>" />
+              <input type="time" id="time" name="time" required />
             </div>
           </div>
 
@@ -73,27 +71,23 @@
             <div class="form-group">
               <label for="status">Statut</label>
               <select id="status" name="status" required>
-                <option value="planned" <%= (eventToEdit && eventToEdit.status === 'planned') ? 'selected' : '' %>>planned</option>
-                <option value="done" <%= (eventToEdit && eventToEdit.status === 'done') ? 'selected' : '' %>>done</option>
-                <option value="canceled" <%= (eventToEdit && eventToEdit.status === 'canceled') ? 'selected' : '' %>>canceled</option>
+                <option value="planned">planned</option>
+                <option value="done">done</option>
+                <option value="canceled">canceled</option>
               </select>
             </div>
             <div class="form-group">
               <label>&nbsp;</label>
-              <% if (eventToEdit) { %>
-                <a class="btn btn-ghost" href="/admin/calendar">Annuler édition</a>
-              <% } else { %>
-                <button class="btn btn-ghost" type="reset">Réinitialiser</button>
-              <% } %>
+              <button class="btn btn-ghost" type="reset">Réinitialiser</button>
             </div>
           </div>
           <div class="actions">
-            <button type="submit" class="btn btn-primary"><%= eventToEdit ? 'Enregistrer' : 'Ajouter' %></button>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
           </div>
         </form>
       </section>
 
-      <!-- RIGHT: Mini-calendar modified with detailed event info -->
+      <!-- DROITE : Calendrier détaillé avec affichage des événements -->
       <section class="card">
         <div class="card-title">
           <h2><%= monthLabel %></h2>
@@ -106,23 +100,21 @@
           <div class="mini-calendar-days">
             <% calendarWeeks.forEach(week => { %>
               <% week.forEach(cell => { %>
-                <div class="mini-day <%= cell.otherMonth ? 'other-month' : '' %> <%= cell.isToday ? 'today' : '' %>">
-                  <span class="mini-num"><%= cell.day %></span>
+                <div class="mini-day <%= cell.otherMonth ? 'other-month' : '' %> <%= cell.isToday ? 'today' : '' %>" style="min-height: 100px; display: flex; flex-direction: column;">
+                  <span class="mini-num" style="font-weight: bold;"><%= cell.day %></span>
                   
-                  <% if (cell.hasEvents && cell.events) { %>
-                    <div class="mini-events-list" style="margin-top: 5px;">
+                  <% if (cell.events && cell.events.length > 0) { %>
+                    <div class="mini-events-list">
                       <% cell.events.forEach(ev => { %>
-                        <div class="mini-event-box" style="border-left: 3px solid #007bff; padding-left: 6px; margin-bottom: 8px; background: rgba(0,123,255,0.05);">
+                        <div class="mini-event-box">
                           <div class="mini-event-info">
-                            <div style="font-size: 10px; font-weight: bold; color: #666;"><%= ev.time_hm %></div>
-                            <div style="font-size: 11px; font-weight: 600; color: #333; line-height: 1.2; margin-bottom: 4px;">
-                              <%= ev.title %>
-                            </div>
+                            <strong><%= ev.time_hm %></strong>
+                            <span><%= ev.title %></span>
                           </div>
-                          <div class="mini-event-actions" style="display: flex; gap: 5px;">
-                            <a href="/admin/calendar/edit/<%= ev.id %>" style="text-decoration:none; font-size: 10px; color: #007bff;">Modifier</a>
-                            <form action="/admin/calendar/delete/<%= ev.id %>" method="POST" style="display:inline;">
-                              <button type="submit" onclick="return confirm('Supprimer ?')" style="border:none; background:none; color:red; cursor:pointer; font-size: 10px; padding: 0;">Suppr.</button>
+                          <div class="mini-event-actions">
+                            <button type="button" class="btn-modifier" data-id="<%= ev.id %>" data-title="<%= ev.title %>" data-description="<%= ev.description %>" data-date="<%= ev.date_ymd %>" data-time="<%= ev.time_hm %>" data-status="<%= ev.status %>">Modifier</button>
+                            <form action="/admin/calendar/delete/<%= ev.id %>" method="POST">
+                              <button type="submit" onclick="return confirm('Supprimer ?')">Suppr.</button>
                             </form>
                           </div>
                         </div>
@@ -139,6 +131,53 @@
     </div>
   </main>
 
+  <!-- Modal pour modifier un evenement -->
+  <div id="modifierModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Modifier un evenement</h2>
+        <button type="button" class="modal-close">&times;</button>
+      </div>
+      <form id="modifierForm" class="modal-form" action="" method="POST">
+        <input type="hidden" id="edit_id" name="id" />
+        <div class="form-group">
+          <label for="edit_title">Titre</label>
+          <input type="text" id="edit_title" name="title" required />
+        </div>
+
+        <div class="form-group">
+          <label for="edit_description">Description</label>
+          <textarea id="edit_description" name="description" rows="4" required></textarea>
+        </div>
+
+        <div class="modal-form-row">
+          <div class="form-group">
+            <label for="edit_date">Date</label>
+            <input type="date" id="edit_date" name="date" required />
+          </div>
+          <div class="form-group">
+            <label for="edit_time">Heure</label>
+            <input type="time" id="edit_time" name="time" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_status">Statut</label>
+          <select id="edit_status" name="status" required>
+            <option value="planned">En planification</option>
+            <option value="done">Termine</option>
+            <option value="canceled">Annule</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost modal-cancel">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     (function () {
       const title = document.getElementById('title');
@@ -152,6 +191,68 @@
         if (time && !time.value) time.value = hm;
       }
     })();
+
+    // Modal functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('modifierModal');
+      const closeBtn = document.querySelector('.modal-close');
+      const cancelBtn = document.querySelector('.modal-cancel');
+      const modifierBtns = document.querySelectorAll('.btn-modifier');
+      
+      // Ouvrir le modal lors du clic sur "Modifier"
+      modifierBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          const title = this.getAttribute('data-title');
+          const description = this.getAttribute('data-description');
+          const date = this.getAttribute('data-date');
+          const time = this.getAttribute('data-time');
+          const status = this.getAttribute('data-status');
+          
+          document.getElementById('edit_id').value = id;
+          document.getElementById('edit_title').value = title;
+          document.getElementById('edit_description').value = description;
+          document.getElementById('edit_date').value = date;
+          document.getElementById('edit_time').value = time;
+          document.getElementById('edit_status').value = status;
+          
+          // Définir l'action du formulaire
+          document.getElementById('modifierForm').action = '/admin/calendar/edit/' + id;
+          
+          // Positionner le modal près du bouton
+          const modalContent = modal.querySelector('.modal-content');
+          const rect = btn.getBoundingClientRect();
+          
+          modalContent.style.position = 'fixed';
+          modalContent.style.top = (rect.top - 360) + 'px';
+          modalContent.style.left = (rect.left - 150) + 'px';
+          
+          modal.classList.add('active');
+        });
+      });
+      
+      // Fermer le modal
+      function closeModal() {
+        modal.classList.remove('active');
+      }
+      
+      closeBtn.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', closeModal);
+      
+      // Fermer le modal si on clique en dehors
+      window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+      
+      // Fermer avec Escape
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          closeModal();
+        }
+      });
+    });
   </script>
 </body>
 </html>

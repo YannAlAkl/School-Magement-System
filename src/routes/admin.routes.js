@@ -17,15 +17,14 @@ router.get('/users/add', admin_controller.showAddUserForm);
 router.get('/users/:username', admin_controller.showUserByUsername);
 router.post('/users/add', admin_controller.addUser);
 router.post('/users/delete/:id', admin_controller.deleteUser);
-router.get('/users/edit-role/:id', admin_controller.showEditRoleForm);
-router.post('/users/edit-role/:id', admin_controller.editUserRole);
-
+router.post('/users/edit-role', admin_controller.editUserRole);
 // Courses
 router.get('/courses', admin_controller.showAllCourses);
 router.get('/courses/:title', admin_controller.showCourseByTitle);
 router.post('/courses/add', admin_controller.addCourse);
 router.post('/courses/edit/:id', admin_controller.editCourse);
 router.post('/courses/delete/:id', admin_controller.deleteCourse);
+
 
 // enrollment
 router.get('/enrolment/by-username/:username', admin_controller.showEnrolmentByUsername);
@@ -45,8 +44,8 @@ router.post('/payments/delete', admin_controller.deletePayment);
 router.get('/calendar', admin_controller.showcalendar);
 router.get('/calendar/edit/:id', admin_controller.showEditEvent);
 router.post('/calendar/add', admin_controller.addEvent);
-router.post('/calendar/edit', admin_controller.editEvent);
-router.post('/calendar/delete', admin_controller.deleteEvent);
+router.post('/calendar/edit/:id', admin_controller.editEvent);
+router.post('/calendar/delete/:id', admin_controller.deleteEvent);
 
 // Others
 router.get('/students/total-amount/:username', admin_controller.getStudentTotalAmount);

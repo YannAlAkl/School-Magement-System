@@ -10,9 +10,15 @@
 <body>
 <main class="container">
 
-    <div class="page-header">
-        <h1>Enrollment & Payment</h1>
-        <p class="muted">Assign students to courses and manage payments.</p>
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h1>Enrollment & Payment</h1>
+            <p class="muted">Assign students to courses and manage payments.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn" onclick="openModal('enrollModal')">Enroll Student</button>
+            <button class="btn" onclick="openModal('paymentModal')">Record Payment</button>
+        </div>
     </div>
 
     <% if (error) { %>
@@ -23,221 +29,421 @@
         <div class="alert alert-success"><%= success %></div>
     <% } %>
 
-    <div class="grid-2">
-
-        <!-- ================= ENROLL STUDENT ================= -->
-        <section class="card">
-            <div class="card-title">
-                <h2>1) Enroll a student</h2>
-                <p class="muted">Select student and course.</p>
-            </div>
-
-            <form action="/admin/enrolment/add" method="POST" class="form">
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Student</label>
-                        <select name="student_username" required>
-                            <option disabled selected>Choose a student…</option>
-                            <% students.forEach(s => { %>
-                                <option value="<%= s.username %>">
-                                    <%= s.username %> — <%= s.email %>
-                                </option>
-                            <% }) %>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Course</label>
-                        <select name="course_title" required>
-                            <option disabled selected>Choose a course…</option>
-                            <% courses.forEach(c => { %>
-                                <option value="<%= c.title %>"><%= c.title %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select name="enroll_status">
-                            <option value="active" selected>Active</option>
-                            <option value="pending">Pending</option>
-                            <option value="suspended">Suspended</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Enrollment date</label>
-                        <input type="date" id="enroll_date" name="enroll_date" required>
-                    </div>
-                </div>
-
-                <div class="actions">
-                    <button class="btn btn-primary">Enroll student</button>
-                </div>
-            </form>
-        </section>
-
-        <!-- ================= PAYMENT ================= -->
-        <section class="card">
-            <div class="card-title">
-                <h2>2) Record a payment</h2>
-            </div>
-
-            <form action="/admin/payments/add" method="POST" class="form">
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Student</label>
-                        <select id="pay_student_username" name="student_username" required>
-                            <option disabled selected>Choose a student…</option>
-                            <% students.forEach(s => { %>
-                                <option value="<%= s.username %>"><%= s.username %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Course (optional)</label>
-                        <select name="course_title">
-                            <option value="">No course</option>
-                            <% courses.forEach(c => { %>
-                                <option value="<%= c.title %>"><%= c.title %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Amount</label>
-                        <input type="number" step="0.01" id="amount" name="amount" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Date</label>
-                        <input type="date" id="payment_date" name="payment_date" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select name="status">
-                            <option value="paid">Paid</option>
-                            <option value="pending">Pending</option>
-                            <option value="failed">Failed</option>
-                            <option value="refunded">Refunded</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Reference</label>
-                        <input type="text" name="reference">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Note</label>
-                    <textarea name="note"></textarea>
-                </div>
-
-                <div class="actions">
-                    <button class="btn btn-primary">Record payment</button>
-                </div>
-            </form>
-        </section>
-    </div>
-
     <!-- ================= ENROLLMENTS TABLE ================= -->
     <section class="card">
         <h2>Enrollments</h2>
 
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Student</th>
-                <th>Course</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <% if (enrolments && enrolments.length > 0) { %>
-                <% enrolments.forEach(e => { %>
-                    <tr>
-                        <td><%= e.student_username %></td>
-                        <td><%= e.course_title %></td>
-                        <td><%= e.enroll_status %></td>
-                        <td><%= e.enroll_date %></td>
-                        <td class="actions-inline">
-                            <a class="btn btn-sm btn-secondary" href="/admin/enrolment/edit/<%= e.enrolment_id %>">Edit</a>
-                            <form method="POST" action="/admin/enrolment/delete/<%= e.enrolment_id %>" style="display:inline;" onsubmit="return confirm('Delete enrollment?')">
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
+        <div class="table-wrap">
+            <table>
+                <thead>
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 20px;">Aucune inscription trouvée.</td>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th style="width: 160px;">Actions</th>
                 </tr>
-            <% } %>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                <% if (enrolments && enrolments.length > 0) { %>
+                    <% enrolments.forEach(e => { %>
+                        <tr>
+                            <td><%= e.student_username %></td>
+                            <td><%= e.course_title %></td>
+                            <td><span class="badge <%= e.enroll_status %>"><%= e.enroll_status %></span></td>
+                            <td><%= e.enroll_date %></td>
+                            <td>
+                                <div class="actions">
+                                    <button class="btn btn-secondary btn-sm" onclick="openEditEnrollModal('<%= e.enrolment_id %>', '<%= e.student_username %>', '<%= e.course_title %>', '<%= e.enroll_status %>', '<%= e.enroll_date %>')">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="openDeleteEnrollModal('<%= e.enrolment_id %>', '<%= e.student_username %>', '<%= e.course_title %>')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px;">No enrollments found.</td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <!-- ================= PAYMENTS TABLE ================= -->
     <section class="card">
         <h2>Payments</h2>
 
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Student</th>
-                <th>Course</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <% if (payments && payments.length > 0) { %>
-                <% payments.forEach(p => { %>
-                    <tr>
-                        <td><%= p.student_username %></td>
-                        <td><%= p.course_title || '—' %></td>
-                        <td><%= p.amount %></td>
-                        <td><%= p.status %></td>
-                        <td><%= p.payment_date %></td>
-                        <td class="actions-inline">
-                            <a class="btn btn-sm btn-secondary" href="/admin/payments/edit/<%= p.payment_id %>">Edit</a>
-                            <form method="POST" action="/admin/payments/delete/<%= p.payment_id %>" style="display:inline;" onsubmit="return confirm('Delete payment?')">
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
+        <div class="table-wrap">
+            <table>
+                <thead>
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 20px;">Aucun paiement trouvé.</td>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th style="width: 160px;">Actions</th>
                 </tr>
-            <% } %>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                <% if (payments && payments.length > 0) { %>
+                    <% payments.forEach(p => { %>
+                        <tr>
+                            <td><%= p.student_username %></td>
+                            <td><%= p.course_title || '—' %></td>
+                            <td>$<%= p.amount %></td>
+                            <td><span class="badge <%= p.status %>"><%= p.status %></span></td>
+                            <td><%= p.payment_date %></td>
+                            <td>
+                                <div class="actions">
+                                    <button class="btn btn-secondary btn-sm" onclick="openEditPaymentModal(this)">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="openDeletePaymentModal('<%= p.payment_id %>', '<%= p.student_username %>', '<%= p.amount %>')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">No payments found.</td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
     </section>
 
 </main>
 
+<!-- ================= ENROLL STUDENT MODAL ================= -->
+<div id="enrollModal" class="modal">
+    <div class="modal-content" style="width: 420px;">
+        <div class="modal-header">
+            <h2>Enroll Student</h2>
+            <button class="modal-close" onclick="closeModal('enrollModal')">&times;</button>
+        </div>
+        <form action="/admin/enrolment/add" method="POST" class="modal-form">
+            <div class="form-group">
+                <label>Student</label>
+                <select name="student_username" id="enroll-student" required>
+                    <option disabled selected>Choose a student…</option>
+                    <% students.forEach(s => { %>
+                        <option value="<%= s.username %>">
+                            <%= s.username %> — <%= s.email %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Course</label>
+                <select name="course_title" id="enroll-course" required>
+                    <option disabled selected>Choose a course…</option>
+                    <% courses.forEach(c => { %>
+                        <option value="<%= c.title %>"><%= c.title %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="modal-form-row">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="enroll_status">
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="modal-enroll-date" name="enroll_date" required>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('enrollModal')">Cancel</button>
+                <button type="submit" class="btn">Enroll</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= PAYMENT MODAL ================= -->
+<div id="paymentModal" class="modal">
+    <div class="modal-content" style="width: 440px;">
+        <div class="modal-header">
+            <h2>Record Payment</h2>
+            <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+        </div>
+        <form action="/admin/payments/add" method="POST" class="modal-form">
+            <div class="modal-form-row">
+                <div class="form-group">
+                    <label>Student</label>
+                    <select name="student_username" id="pay-student" required>
+                        <option disabled selected>Choose a student…</option>
+                        <% students.forEach(s => { %>
+                            <option value="<%= s.username %>"><%= s.username %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Course (optional)</label>
+                    <select name="course_title">
+                        <option value="">No course</option>
+                        <% courses.forEach(c => { %>
+                            <option value="<%= c.title %>"><%= c.title %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-form-row">
+                <div class="form-group">
+                    <label>Amount ($)</label>
+                    <input type="number" step="0.01" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="modal-payment-date" name="payment_date" required>
+                </div>
+            </div>
+            <div class="modal-form-row">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reference</label>
+                    <input type="text" name="reference">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Note</label>
+                <textarea name="note" rows="2"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('paymentModal')">Cancel</button>
+                <button type="submit" class="btn">Record Payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= EDIT ENROLLMENT MODAL ================= -->
+<div id="editEnrollModal" class="modal">
+    <div class="modal-content" style="width: 420px;">
+        <div class="modal-header">
+            <h2>Edit Enrollment</h2>
+            <button class="modal-close" onclick="closeModal('editEnrollModal')">&times;</button>
+        </div>
+        <form id="edit-enroll-form" action="/admin/enrolment/edit" method="POST" class="modal-form">
+            <input type="hidden" id="edit-enroll-id" name="enrolment_id" />
+            <div class="form-group">
+                <label>Student</label>
+                <input type="text" id="edit-enroll-student" readonly style="opacity: 0.6;" />
+            </div>
+            <div class="form-group">
+                <label>Course</label>
+                <select name="course_title" id="edit-enroll-course" required>
+                    <% courses.forEach(c => { %>
+                        <option value="<%= c.title %>"><%= c.title %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="modal-form-row">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="enroll_status" id="edit-enroll-status">
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="edit-enroll-date" name="enroll_date" required>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('editEnrollModal')">Cancel</button>
+                <button type="submit" class="btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= EDIT PAYMENT MODAL ================= -->
+<div id="editPaymentModal" class="modal">
+    <div class="modal-content" style="width: 440px;">
+        <div class="modal-header">
+            <h2>Edit Payment</h2>
+            <button class="modal-close" onclick="closeModal('editPaymentModal')">&times;</button>
+        </div>
+        <form id="edit-payment-form" action="/admin/payments/edit" method="POST" class="modal-form">
+            <input type="hidden" id="edit-payment-id" name="payment_id" />
+            <div class="modal-form-row">
+                <div class="form-group">
+                    <label>Student</label>
+                    <input type="text" id="edit-pay-student" readonly style="opacity: 0.6;" />
+                </div>
+                <div class="form-group">
+                    <label>Course (optional)</label>
+                    <select name="course_title" id="edit-pay-course">
+                        <option value="">No course</option>
+                        <% courses.forEach(c => { %>
+                            <option value="<%= c.title %>"><%= c.title %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-form-row">
+                <div class="form-group">
+                    <label>Amount ($)</label>
+                    <input type="number" step="0.01" id="edit-pay-amount" name="amount" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="edit-pay-date" name="payment_date" required>
+                </div>
+            </div>
+            <div class="modal-form-row">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" id="edit-pay-status">
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reference</label>
+                    <input type="text" id="edit-pay-reference" name="reference">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Note</label>
+                <textarea name="note" id="edit-pay-note" rows="2"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="closeModal('editPaymentModal')">Cancel</button>
+                <button type="submit" class="btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= DELETE ENROLLMENT MODAL ================= -->
+<div id="deleteEnrollModal" class="modal">
+    <div class="modal-content" style="width: 340px;">
+        <div class="modal-header">
+            <h2>Confirm Delete</h2>
+            <button class="modal-close" onclick="closeModal('deleteEnrollModal')">&times;</button>
+        </div>
+        <div class="modal-form">
+            <p style="margin: 0 0 12px 0; color: var(--muted); font-size: 14px;">
+                Are you sure you want to delete enrollment for <strong id="delete-enroll-student"></strong> in <strong id="delete-enroll-course"></strong>?
+            </p>
+            <form id="delete-enroll-form" action="" method="POST" style="display: inline;">
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('deleteEnrollModal')">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= DELETE PAYMENT MODAL ================= -->
+<div id="deletePaymentModal" class="modal">
+    <div class="modal-content" style="width: 340px;">
+        <div class="modal-header">
+            <h2>Confirm Delete</h2>
+            <button class="modal-close" onclick="closeModal('deletePaymentModal')">&times;</button>
+        </div>
+        <div class="modal-form">
+            <p style="margin: 0 0 12px 0; color: var(--muted); font-size: 14px;">
+                Are you sure you want to delete payment of <strong id="delete-pay-amount"></strong> for <strong id="delete-pay-student"></strong>?
+            </p>
+            <form id="delete-pay-form" action="" method="POST" style="display: inline;">
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('deletePaymentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Auto date
     const today = new Date().toISOString().slice(0,10);
-    document.getElementById('enrol_date').value = today;
-    document.getElementById('payment_date').value = today;
+
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Auto-fill dates
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('modal-enroll-date').value = today;
+        document.getElementById('modal-payment-date').value = today;
+    });
+
+    function openEditEnrollModal(id, student, course, status, date) {
+        document.getElementById('edit-enroll-id').value = id;
+        document.getElementById('edit-enroll-student').value = student;
+        document.getElementById('edit-enroll-course').value = course;
+        document.getElementById('edit-enroll-status').value = status;
+        document.getElementById('edit-enroll-date').value = date;
+        openModal('editEnrollModal');
+    }
+
+    function openEditPaymentModal(btn) {
+        const row = btn.closest('tr');
+        const cells = row.querySelectorAll('td');
+        
+        document.getElementById('edit-payment-id').value = '';
+        document.getElementById('edit-pay-student').value = cells[0].textContent.trim();
+        document.getElementById('edit-pay-course').value = cells[1].textContent.trim() === '—' ? '' : cells[1].textContent.trim();
+        document.getElementById('edit-pay-amount').value = cells[2].textContent.replace('$', '').trim();
+        document.getElementById('edit-pay-status').value = cells[3].textContent.trim();
+        document.getElementById('edit-pay-date').value = cells[4].textContent.trim();
+        openModal('editPaymentModal');
+    }
+
+    function openDeleteEnrollModal(id, student, course) {
+        document.getElementById('delete-enroll-student').textContent = student;
+        document.getElementById('delete-enroll-course').textContent = course;
+        document.getElementById('delete-enroll-form').action = '/admin/enrolment/delete/' + id;
+        openModal('deleteEnrollModal');
+    }
+
+    function openDeletePaymentModal(id, student, amount) {
+        document.getElementById('delete-pay-student').textContent = student;
+        document.getElementById('delete-pay-amount').textContent = '$' + amount;
+        document.getElementById('delete-pay-form').action = '/admin/payments/delete/' + id;
+        openModal('deletePaymentModal');
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('active');
+        }
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
 </script>
 
 </body>
