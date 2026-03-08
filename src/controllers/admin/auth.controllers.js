@@ -1,10 +1,16 @@
 const User = require('../../models/admin/user.model.js');
-async function showLoginAdmin( res) {
-    return res.redirect('authentification/admin/login', {
+async function showLogin(req, res) {
+    if (req.session && req.session.user) {
+        const role = req.session.user.role;
+        if (role === 'admin') return res.redirect('/admin');
+        if (role === 'teacher') return res.redirect('/teacher');
+        return res.redirect('/student');
+    }
+ 
+    return res.render('login', {
         error: null
     });
 }
-
 
 async function login(req, res) {
     
@@ -57,7 +63,7 @@ async function login(req, res) {
 async function logout(req, res) {
     const user = req.session && req.session.user;
     const role = req.session.user.role;
-    req.session.destroy(err => {
+    req.session.destroyit (err => {
         if (err) {
             console.error('Erreur lors de la destruction de la session', err);
             return res.status(500).redirect('/');
@@ -77,7 +83,7 @@ async function showRegister(req, res) {
     }
     if (user && role === 'admin') return res.redirect('/register/admin');
     if (user && role === 'teacher') return res.redirect('/register/teacher');
-    return res.redirect('/register/student');
+    return res.redirect('/register/student');t 
 }
 async function register(req, res) {
     const userCount = await User.db_count_users();
@@ -116,7 +122,7 @@ async function register(req, res) {
 }
 
 module.exports = {
-    showLoginAdmin,
+    showLogin,
     login,
     logout,
     showRegister,
