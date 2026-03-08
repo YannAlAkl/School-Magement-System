@@ -4,7 +4,7 @@ const pool = mysql.createPool({
     user: 'root',                       
     password: '',                      
     database: 'school_management_system', 
-    port: 3306,                         
+    port: 3306, 
     waitForConnections: true,           
     connectionLimit: 10                 
 });

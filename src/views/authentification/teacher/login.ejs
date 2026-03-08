@@ -3,22 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
+  <title>Login - Étudiant</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <div class="center-screen">
     <div class="card card-sm">
-      <h1 class="auth-title">Login</h1>
-      <p class="auth-subtitle">Connect to your account</p>
+      <div class="switch-container">
+        <a href="/login/admin" class="btn-switch">Accès Administrateur →</a>
+      </div>
+      <h1 class="auth-title">Connexion Enseignant</h1>
+      <p class="auth-subtitle">Connectez-vous à votre compte</p>
 
       <% if (error) { %>
         <div class="alert alert-error"><%= error %></div>
       <% } %>
 
-      <form action="/login" method="POST">
+      <form action="/login/teacher" method="POST">
         <div class="form-group">
-          <label for="username">Nom d'utilisateur</label>
+          <label for="username">Nom de l'étudiant</label>
           <input type="text" id="username" name="username" required />
         </div>
 
@@ -29,10 +32,6 @@
 
         <button class="btn btn-block" type="submit">Se connecter</button>
       </form>
-
-      <div class="auth-footer">
-        Pas encore de compte ? <a href="/register">S'inscrire</a>
-      </div>
     </div>
   </div>
 </body>

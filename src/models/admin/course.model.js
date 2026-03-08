@@ -1,4 +1,5 @@
-const db = require('../db');
+const db = require('../../db');
+const Users = require('./user.model');
 
 async function db_insert_course(title, description, coeficient, course_hours, course_price) {
     const sql = `INSERT INTO courses (title, description, coeficient, course_hours, course_price) VALUES (?, ?, ?, ?, ?)`;
@@ -105,10 +106,10 @@ async function db_calculateStudentTotalAmount(student_username) {
 }
 
 async function db_getEnrollmentPageData() {
-    const users = await require('../models/user.model').db_find_all_users();
+    const users = await Users.db_find_all_users();
     const courses = await db_find_all_courses();
     const enrolments = await db_find_all_enrolments();
-    const payments = await db_show_all_payments();
+    const payments = await db_showAllPayments();
 
     return {
         students: users.filter(u => u.role === 'student'),
@@ -148,5 +149,6 @@ module.exports = {
     db_showAllPaymentsByUsername,
     db_showAllPaymentsByCourse,
     db_calculateStudentTotalAmount,
-    db_getEnrollmentPageData
+    db_getEnrollmentPageData,
+    db_show_all_payments  
 };

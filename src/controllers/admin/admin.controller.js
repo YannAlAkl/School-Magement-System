@@ -4,10 +4,10 @@
  */
 
 // Import models
-const User = require('../models/user.model');
-const Course = require('../models/course.model');
-const Event = require('../models/calendar.model');
-const Enrolment = require('../models/enrolment.model');
+const User = require('../../models/admin/user.model');
+const Course = require('../../models/admin/course.model');
+const Event = require('../../models/admin/calendar.model');
+const Enrolment = require('../../models/admin/enrolment.model');
 
 
 // ============================================
@@ -115,11 +115,9 @@ async function showDashboard(req, res) {
     try {
         const users = await User.db_find_all_users();
 
-        // Read flash messages set by delete/edit-role
         const error = req.session.error || null;
         const success = req.session.success || null;
 
-        // Clear them after reading
         req.session.error = null;
         req.session.success = null;
 
@@ -264,8 +262,13 @@ async function addUser(req, res) {
 
         // Insert new user
         await User.db_insert_user(username, email, password, role);
+        
+        // Fetch all users for the dashboard
+        const users = await User.db_find_all_users();
+        
         return res.render('admin/dashboard', {
             user: req.session.user,
+            users: users,
             error: null,
             success: 'User added with success.',
         });
@@ -330,48 +333,10 @@ async function showAllCourses(req, res) {
     }
 }
 
-<<<<<<< HEAD
 /**
  * Show course edit form
  * GET /admin/courses/:title
  */
-=======
-//fixed the add
-async function editCourse(req, res) {
-    const courseId = req.params.id; 
-    const { title, description, coeficient, course_hours } = req.body; 
-
-    try {
-        const success = await Course.db_edit_course(courseId, title, description, coeficient, course_hours); 
-        if (success) {
-            req.session.success = "Course updated with success.";
-        } else {
-            req.session.error = "Error updating course.";
-        }
-    }
-    catch (err) {
-        console.error("Error editing course:", err);
-        req.session.error = 'Server error while updating course.';
-    }    
-    return res.redirect('/admin/courses'); 
-}
-
-async function deleteCourse(req, res) {
-    const courseId = req.params.id;
-    try {
-        const success = await Course.db_delete_course(courseId);
-        if (success) {
-            req.session.success = 'Course deleted with success.';
-        } else {
-            req.session.error = "Error deleting course.";
-        }
-    } catch (err) {
-        console.error("Error deleting course:", err);
-        req.session.error = "Server error while deleting course.";
-    }
-    return res.redirect('/admin/courses');
-}
->>>>>>> d165cbe8dc259a270835f521a7feace92368838d
 async function showCourseByTitle(req, res) {
     const courseTitle = req.params.title;
     try {
@@ -433,10 +398,9 @@ async function addCourse(req, res) {
  */
 async function editCourse(req, res) {
     const courseId = req.params.id; 
-    const { title, description, coeficient, course_hours } = req.body; 
-
+    const {  title, description, coeficient, course_hours, course_price } = req.body; 
     try {
-        const success = await Course.db_update_course(courseId, title, description, coeficient, course_hours); 
+        const success = await Course.db_edit_course(courseId,  title, description, coeficient, course_hours, course_price); 
         if (success) {
             req.session.success = "Course updated with success.";
         } else {

@@ -1,4 +1,5 @@
-const db = require('../db');
+const db = require('../../db');
+
 async function db_find_user_by_username(username) {
     const sql = `SELECT * FROM users WHERE username = ?`; 
     const [rows] = await db.execute(sql, [username]); 
@@ -28,13 +29,11 @@ async function db_count_users() {
     return rows[0].count; 
 }
 
-
 async function db_find_all_users() {
     const sql = `SELECT * FROM users`; 
     const [rows] = await db.execute(sql); 
     return rows; 
 }
-
 
 async function db_update_user_role(userId, newRole) {
     const sql = `UPDATE users SET role = ? WHERE id = ?`;
@@ -42,13 +41,11 @@ async function db_update_user_role(userId, newRole) {
     return result.affectedRows > 0;
 }
 
-
 async function db_delete_user(userId) {
     const sql = `DELETE FROM users WHERE id = ?`;
     const [result] = await db.execute(sql, [userId]);
     return result.affectedRows > 0;
 }
-
 
 async function verifyPassword(plainPassword, storedPassword) {
     if (!storedPassword) return false;

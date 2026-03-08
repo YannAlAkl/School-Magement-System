@@ -1,8 +1,6 @@
-const db = require('../db');
+const db = require('../../db');
 const User = require('./user.model');
 const Course = require('./course.model');
-
-
 
 async function db_addEnrolment(student_username, course_title, enroll_status, enroll_date) {
     const sql = `
@@ -24,20 +22,20 @@ async function db_deleteEnrolment(enrolment_id) {
 }
 
 async function db_showAllEnrolements() {
-    const sql = `SELECT * FROM enrolments`;
+    const sql = `SELECT * FROM enrolment`;
     const [rows] = await db.execute(sql);
     return rows;
 }   
 
 
 async function db_findEnrolementsByUser(student_username) {
-    const sql = `SELECT * FROM enrolments WHERE student_username = ?`;
+    const sql = `SELECT * FROM enrolment WHERE student_username = ?`;
     const [rows] = await db.execute(sql, [student_username]);
     return rows;
 }
 
 async function db_findEnrolementsByCourse(course_title) {
-    const sql = `SELECT * FROM enrolments WHERE course_title = ?`;
+    const sql = `SELECT * FROM enrolment WHERE course_title = ?`;
     const [rows] = await db.execute(sql, [course_title]);
     return rows;
 }
@@ -84,11 +82,11 @@ async function db_findPaymentByUsername(payment_id) {
 
 async function db_calculateStudentTotalAmount(student_username) {
 
-    const sqlEnrollments = `SELECT course_title FROM enrolments WHERE student_username = ? AND enroll_status = 'active'`;
-    const enrollments = await db.query(sqlEnrollments, [student_username]);
+    const sqlEnrollments = `SELECT course_title FROM enrolment WHERE student_username = ? AND enroll_status = 'active'`;
+    const [enrollments] = await db.execute(sqlEnrollments, [student_username]);
 
     const sqlCourses = `SELECT title, course_price FROM courses`;
-    const courses = await db.query(sqlCourses);
+    const [courses] = await db.execute(sqlCourses);
 
     let total = 0;
 
@@ -121,7 +119,7 @@ async function db_getEnrollmentPageData() {
                 course_title,
                 enroll_status,
                 enroll_date
-            FROM enrolments
+            FROM enrolment
             ORDER BY enroll_date DESC
         `;
         const [enrolments] = await db.execute(enrolmentSql);

@@ -8,16 +8,6 @@
 </head>
 <body>
     <div class="container">
-<<<<<<< HEAD
-        <div class="card">
-            <div class="page-title">
-                <div>
-                    <h1>Manage Courses</h1>
-                    <p class="subtitle">School Management System</p>
-                </div>
-                <button class="btn" onclick="openModal('addCourseModal', this)">+ Add Course</button>
-            </div>
-=======
         <h1>Manage Courses</h1>
 
         <% if (error) { %>
@@ -52,57 +42,8 @@
             </div>
             <button type="submit">Add Course</button>
         </form>
-
+        
         <!-- List Courses -->
-        <h2>Existing Courses</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Coeficient</th>
-                <th>Course Hours</th>
-                <th>Course Price</th>
-                <th style="width: 220px;">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% courses.forEach(u => { %>
-                <tr>
-                  <td><%= u.id %></td>
-                  <td><%= u.title %></td>
-                  <td><%= u.description %></td>
-                  <td><%= u.coeficient %></td>
-                  <td><%= u.course_hours %></td>
-                  <td><%= u.course_price %></td>
-
-                  <td>
-                    <div class="actions">
-                      <a class="btn btn-secondary" href="/admin/courses/edit/<%= u.id %>">Edit Course</a>
-
-                      <form action="/admin/courses/delete/<%= u.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this course?');">
-                        <button class="btn btn-danger" type="submit">Delete</button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-       
->>>>>>> d165cbe8dc259a270835f521a7feace92368838d
-
-            <% if (error) { %>
-                <div class="alert alert-error"><%= error %></div>
-            <% } %>
-            <% if (success) { %>
-                <div class="alert alert-success"><%= success %></div>
-            <% } %>
-
-            <!-- List Courses -->
             <h2>Existing Courses</h2>
             <% if (courses && courses.length > 0) { %>
                 <div class="table-wrap">

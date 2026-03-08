@@ -1,4 +1,4 @@
-const db = require('../db');
+const db = require('../../db');
 async function db_insert_event(title, description, date, time, status, created_at, updated_at) {
   const sql = `INSERT INTO events (title, description, date, time, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`;
   const [result] = await db.execute(sql, [title, description, date, time, status, created_at, updated_at]);
